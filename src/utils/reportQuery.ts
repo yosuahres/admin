@@ -37,14 +37,24 @@ export async function runReportQuery(
         }
         break;
 
-      case "select":
-        if (typeof val === "string" && val) {
-          // Boolean columns stored as boolean in Postgres
-          if (val === "true")  { query = query.eq(filterDef.key, true);  break; }
-          if (val === "false") { query = query.eq(filterDef.key, false); break; }
-          query = query.eq(filterDef.key, val);
+      case "select": {
+        const vals = Array.isArray(val) ? val : [val];
+        if (vals.length === 0) break;
+        if (vals.length === 1) {
+          const v = String(vals[0]);
+          if (v === "true")  { query = query.eq(filterDef.key, true);  break; }
+          if (v === "false") { query = query.eq(filterDef.key, false); break; }
+          query = query.eq(filterDef.key, v);
+        } else {
+          const hasBool = vals.some((v) => v === "true" || v === "false");
+          if (hasBool) {
+            query = query.in(filterDef.key, vals.map((v) => v === "true" ? true : v === "false" ? false : v));
+          } else {
+            query = query.in(filterDef.key, vals);
+          }
         }
         break;
+      }
 
       case "multiselect":
         if (Array.isArray(val) && val.length > 0) {

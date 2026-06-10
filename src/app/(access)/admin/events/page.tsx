@@ -1,11 +1,11 @@
 //admin/events/page.tsx
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import MasterDataTable from "@/components/MasterDataTable";
 import ModalForm from "@/components/ModalForm";
-import { exportTemplate } from "@/utils/exportutils";
 import { generateOccurrences } from "@/utils/occurrenceGenerator";
 import type { ColumnSchema } from "@/utils/exportutils";
+import { useSetPageActions } from "@/contexts/page-actions";
 import { createClient } from "@/lib/supabase/client";
 import type { TablesInsert, TablesUpdate } from "@/types/database.types";
 
@@ -46,6 +46,7 @@ export default function EventsPage() {
   const [editItem, setEditItem]             = useState<any | null>(null);
   const [isSubmitting, setIsSubmitting]     = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const tableItemsRef = useRef<any[]>([]);
 
   // Expanded row state
   const [expandedId, setExpandedId]         = useState<string | null>(null);
@@ -418,24 +419,21 @@ export default function EventsPage() {
           .map((ev: any) => generateOccurrences(ev))
       );
     }
+    triggerRefresh();
   };
+
+  useSetPageActions({
+    addLabel: "Event Baru",
+    onAdd: handleAdd,
+    exportTitle: "Events",
+    exportSchema: EVENTS_SCHEMA,
+    getItems: () => tableItemsRef.current,
+    onImport: handleImport,
+  });
 
   // ── Render ───────────────────────────────────────────────────────
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-1">Events</h1>
-          <p className="text-sm text-gray-500">Kelola jadwal dan kegiatan gereja</p>
-        </div>
-        <button
-          onClick={() => exportTemplate("Events", EVENTS_SCHEMA)}
-          className="text-sm text-gray-500 hover:text-blue-600 underline underline-offset-2"
-        >
-          Unduh Template Import
-        </button>
-      </div>
-
+    <div className="p-4">
       <MasterDataTable
         title="Events"
         endpoint="/api/events"
@@ -445,6 +443,7 @@ export default function EventsPage() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onImport={handleImport}
+        onItemsChange={(items) => { tableItemsRef.current = items; }}
         refreshTrigger={refreshTrigger}
         renderExpandedRow={renderExpandedRow}
         defaultSortKey="event_date"

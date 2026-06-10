@@ -39,7 +39,7 @@ export const adminNav: NavItem[] = [
 
 export const leaderNav: NavItem[] = [
   { href: "/leader", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/leader/icare", label: "Pertemuan", icon: BookOpen },
+  { href: "/leader/pertemuan", label: "Pertemuan", icon: BookOpen },
   { href: "/leader/members", label: "Anggota", icon: Users },
   { href: "/leader/reports", label: "Reports", icon: BookOpen },
 ];

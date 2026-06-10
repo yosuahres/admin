@@ -59,6 +59,12 @@ export const REPORT_CONFIGS: ReportConfig[] = [
         placeholder: "Cari tahap pemuridan...",
       },
       {
+        key: "alamat",
+        label: "Alamat",
+        type: "text",
+        placeholder: "Cari berdasarkan alamat...",
+      },
+      {
         key: "tanggal_join",
         label: "Tanggal Join",
         type: "date_range",
@@ -67,12 +73,6 @@ export const REPORT_CONFIGS: ReportConfig[] = [
         key: "dob",
         label: "Tanggal Lahir",
         type: "date_range",
-      },
-      {
-        key: "alamat",
-        label: "Alamat",
-        type: "text",
-        placeholder: "Cari berdasarkan alamat...",
       },
     ],
     columns: [
@@ -125,7 +125,7 @@ export const REPORT_CONFIGS: ReportConfig[] = [
     label: "Laporan iCare",
     allowedRoles: ["admin", "leader"], // ← both roles
     table: "icare_meetings",
-    select: `*, icare_groups(nama_icare, hari_pertemuan, lokasi_pertemuan, jemaat(nama_lengkap), icare_members(id))`,
+    select: `*, icare_groups(nama_icare, lokasi_pertemuan, jemaat(nama_lengkap), icare_members(id))`,
     searchColumn: "topik",
     defaultSort: { column: "tanggal", ascending: false },
     filters: [
@@ -146,7 +146,9 @@ export const REPORT_CONFIGS: ReportConfig[] = [
         return {
           "Nama iCare":     group.nama_icare ?? "-",
           "Leader":         group.jemaat?.nama_lengkap ?? "-",
-          "Hari Pertemuan": group.hari_pertemuan ?? "-",
+          "Hari Pertemuan": row.tanggal
+            ? new Date(row.tanggal).toLocaleDateString("id-ID", { weekday: "long" })
+            : "-",
           "Lokasi iCare":   group.lokasi_pertemuan ?? "-",
           "Tanggal":        row.tanggal
             ? new Date(row.tanggal).toLocaleDateString("id-ID", {
@@ -168,6 +170,14 @@ export const REPORT_CONFIGS: ReportConfig[] = [
         key: "leader_id",
         label: "Leader",
         render: (_, row) => row.icare_groups?.jemaat?.nama_lengkap ?? "-",
+      },
+      {
+        key: "hari",
+        label: "Hari",
+        render: (_, row) =>
+          row.tanggal
+            ? new Date(row.tanggal).toLocaleDateString("id-ID", { weekday: "long" })
+            : "-",
       },
       {
         key: "tanggal",

@@ -8,8 +8,5 @@ export async function GET(request: Request) {
   const { data, error } = await supabase.rpc("get_profiles_with_jemaat");
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-  console.log("First row:", JSON.stringify(data?.[0], null, 2)); // 👈 here
-
   return NextResponse.json(data ?? []);
 }

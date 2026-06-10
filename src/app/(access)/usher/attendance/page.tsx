@@ -113,11 +113,6 @@ export default function UsherAttendancePage() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
 
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">Laporan Kehadiran</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Catat jumlah jemaat yang hadir</p>
-      </div>
-
       {submitDone ? (
         <Card className="p-8 text-center">
           <div className="w-12 h-12 rounded-full bg-green-50 border border-green-100 flex items-center justify-center mx-auto mb-4">

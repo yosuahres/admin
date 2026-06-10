@@ -9,7 +9,6 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 export async function fetchFromBackend(url: string) {
   try {
-    console.log("Fetching from:", url);
     const urlObj = new URL(url, "http://localhost");
     const pathname = urlObj.pathname;
     const searchParams = urlObj.searchParams;
@@ -24,6 +23,10 @@ export async function fetchFromBackend(url: string) {
         ? supabase
             .from("profiles")
             .select("*, jemaat!jemaat_user_id_fkey(id, nama_lengkap)", { count: "exact" })
+        : tableName === "departments"
+        ? supabase
+            .from("departments")
+            .select("id, nama_pelayanan, deskripsi, leader_id, created_at, jemaat(nama_lengkap), department_members(count)", { count: "exact" })
         : supabase.from(tableName as any).select("*", { count: "exact" });
 
     // Apply pagination
@@ -45,6 +48,8 @@ export async function fetchFromBackend(url: string) {
         query = query.ilike("nama_lengkap", `%${search}%`);
       } else if (tableName === "events") {
         query = query.ilike("event_name", `%${search}%`);
+      } else if (tableName === "departments") {
+        query = query.ilike("nama_pelayanan", `%${search}%`);
       }
     }
 
@@ -58,9 +63,7 @@ export async function fetchFromBackend(url: string) {
     const { data, error, count } = await query;
     if (error) throw error;
 
-    console.log("Raw profiles row sample:", JSON.stringify(data?.[0], null, 2));
-
-    // Flatten jemaat join for profiles
+    // Flatten relation joins
     const flatData =
       tableName === "profiles"
         ? (data as any[]).map((row) => ({
@@ -68,6 +71,14 @@ export async function fetchFromBackend(url: string) {
             jemaat_nama: row.jemaat?.[0]?.nama_lengkap ?? null,
             jemaat_id:   row.jemaat?.[0]?.id ?? null,
             jemaat:      undefined,
+          }))
+        : tableName === "departments"
+        ? (data as any[]).map((row) => ({
+            ...row,
+            jemaat_nama:       row.jemaat?.nama_lengkap ?? null,
+            jemaat:            undefined,
+            member_count:      row.department_members?.[0]?.count ?? 0,
+            department_members: undefined,
           }))
         : data;
 

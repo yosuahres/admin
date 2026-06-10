@@ -1,7 +1,6 @@
 //pastoral/page.tsx
 "use client";
 import { useEffect, useState } from "react";
-import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 
@@ -27,11 +26,9 @@ export default function DashboardPage() {
       <div className="flex flex-1 min-h-0">
         <Sidebar />
         <main className="flex-1 p-8 bg-zinc-50 dark:bg-black">
-          <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
           <p>Welcome to the pastor dashboard!</p>
         </main>
       </div>
-      <Footer />
     </div>
   );
 }

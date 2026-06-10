@@ -1,10 +1,10 @@
 // admin/users/page.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MasterDataTable from "@/components/MasterDataTable";
 import ModalForm from "@/components/ModalForm";
-import { exportTemplate } from "@/utils/exportutils";
 import type { ColumnSchema } from "@/utils/exportutils";
+import { useSetPageActions } from "@/contexts/page-actions";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/types/database.types";
 
@@ -36,6 +36,7 @@ export default function UsersPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [jemaatOptions,  setJemaatOptions]  = useState<{ value: string; label: string }[]>([]);
   const [linkedJemaatId, setLinkedJemaatId] = useState("");
+  const tableItemsRef = useRef<any[]>([]);
 
   const supabase = createClient();
   const triggerRefresh = () => setRefreshTrigger((k) => k + 1);
@@ -275,23 +276,20 @@ export default function UsersPage() {
 
     const { error } = await supabase.from("profiles").insert(payload);
     if (error) throw new Error(error.message);
+    triggerRefresh();
   };
 
-  return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-1">Users</h1>
-          <p className="text-sm text-gray-500">Kelola profil pengguna dan role akses</p>
-        </div>
-        <button
-          onClick={() => exportTemplate("Users", USERS_SCHEMA)}
-          className="text-sm text-gray-500 hover:text-blue-600 underline underline-offset-2"
-        >
-          Unduh Template Import
-        </button>
-      </div>
+  useSetPageActions({
+    addLabel: "User Baru",
+    onAdd: handleAdd,
+    exportTitle: "Users",
+    exportSchema: USERS_SCHEMA,
+    getItems: () => tableItemsRef.current,
+    onImport: handleImport,
+  });
 
+  return (
+    <div className="p-4">
       <MasterDataTable
         title="Users"
         endpoint="/api/profiles"
@@ -301,6 +299,7 @@ export default function UsersPage() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onImport={handleImport}
+        onItemsChange={(items) => { tableItemsRef.current = items; }}
         refreshTrigger={refreshTrigger}
       />
 

@@ -18,7 +18,6 @@ import { createClient } from "@/lib/supabase/client";
 type IcareGroup = {
   id: string;
   nama_icare: string;
-  hari_pertemuan: string | null;
   lokasi_pertemuan: string | null;
 };
 
@@ -81,6 +80,7 @@ export default function IcareMeetingsPage() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [members, setMembers] = useState<Jemaat[]>([]);
   const [loadingPage, setLoadingPage] = useState(true);
+  const [loadError, setLoadError] = useState<"no_jemaat" | "no_group" | null>(null);
 
   const [showForm, setShowForm] = useState(false);
   const [tanggal, setTanggal] = useState(new Date().toISOString().split("T")[0]);
@@ -104,16 +104,18 @@ export default function IcareMeetingsPage() {
 
   const loadData = async () => {
     setLoadingPage(true);
+    setLoadError(null);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoadingPage(false); return; }
 
     const { data: self } = await supabase.from("jemaat").select("id").eq("user_id", user.id).maybeSingle();
-    if (!self) { setLoadingPage(false); return; }
+    if (!self) { setLoadError("no_jemaat"); setLoadingPage(false); return; }
 
-    const { data: g } = await supabase
-      .from("icare_groups").select("id, nama_icare, hari_pertemuan, lokasi_pertemuan")
+    const { data: g, error: gErr } = await supabase
+      .from("icare_groups").select("id, nama_icare, lokasi_pertemuan")
       .eq("leader_id", self.id).maybeSingle();
-    if (!g) { setLoadingPage(false); return; }
+    if (gErr) { console.error("icare_groups query error:", gErr); }
+    if (!g) { setLoadError("no_group"); setLoadingPage(false); return; }
 
     setGroup(g);
     setLokasi(g.lokasi_pertemuan ?? "");
@@ -262,10 +264,9 @@ export default function IcareMeetingsPage() {
         <div>
           <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">iCare Group</p>
           <h1 className="text-sm font-semibold text-gray-900">{group?.nama_icare ?? "Grup Tidak Ditemukan"}</h1>
-          {group && (
+          {group?.lokasi_pertemuan && (
             <div className="flex gap-3 mt-0.5">
-              {group.hari_pertemuan && <span className="flex items-center gap-1 text-xs text-gray-400"><Calendar size={10} />{group.hari_pertemuan}</span>}
-              {group.lokasi_pertemuan && <span className="flex items-center gap-1 text-xs text-gray-400"><MapPin size={10} />{group.lokasi_pertemuan}</span>}
+              <span className="flex items-center gap-1 text-xs text-gray-400"><MapPin size={10} />{group.lokasi_pertemuan}</span>
             </div>
           )}
         </div>
@@ -279,7 +280,11 @@ export default function IcareMeetingsPage() {
 
       {!group && (
         <p className="m-5 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
-          Anda belum ditugaskan sebagai leader di iCare group manapun. Hubungi admin.
+          {loadError === "no_jemaat"
+            ? "Akun Anda belum ditautkan ke data jemaat. Minta admin untuk menautkan akun Anda ke data jemaat di halaman Users."
+            : loadError === "no_group"
+            ? "Data jemaat Anda ditemukan, tetapi belum ditugaskan sebagai leader di iCare group manapun. Minta admin untuk mengatur leader_id di halaman iCare Groups."
+            : "Anda belum ditugaskan sebagai leader di iCare group manapun. Hubungi admin."}
         </p>
       )}
 

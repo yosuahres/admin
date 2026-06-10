@@ -57,11 +57,7 @@ export default function UsherAttendanceHistoryPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900">Riwayat Laporan</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Semua laporan yang pernah dikirim</p>
-        </div>
+      <div className="mb-6 flex justify-end">
         {!loading && history.length > 0 && (
           <span className="text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">
             {history.length} laporan

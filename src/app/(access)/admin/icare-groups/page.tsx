@@ -1,10 +1,10 @@
 // admin/icare-groups/page.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MasterDataTable from "@/components/MasterDataTable";
 import ModalForm from "@/components/ModalForm";
-import { exportTemplate } from "@/utils/exportutils";
 import type { ColumnSchema } from "@/utils/exportutils";
+import { useSetPageActions } from "@/contexts/page-actions";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/types/database.types";
 
@@ -15,8 +15,6 @@ type LeaderOption = { value: string; label: string };
 
 const ICARE_SCHEMA: ColumnSchema[] = [
   { key: "nama_icare",       label: "Nama iCare",       type: "string", required: true },
-  { key: "hari_pertemuan",   label: "Hari Pertemuan",   type: "string" },
-  { key: "jam_pertemuan",    label: "Jam Pertemuan",    type: "string" },
   { key: "lokasi_pertemuan", label: "Lokasi Pertemuan", type: "string" },
   { key: "deskripsi",        label: "Deskripsi",        type: "string" },
 ];
@@ -27,6 +25,7 @@ export default function IcareGroupsPage() {
   const [isSubmitting,   setIsSubmitting]   = useState(false);
   const [leaderOptions,  setLeaderOptions]  = useState<LeaderOption[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const tableItemsRef = useRef<any[]>([]);
 
   const supabase = createClient();
   const triggerRefresh = () => setRefreshTrigger((k) => k + 1);
@@ -95,12 +94,6 @@ export default function IcareGroupsPage() {
         );
       },
     },
-    { key: "hari_pertemuan", label: "Hari Pertemuan" },
-    {
-      key: "jam_pertemuan",
-      label: "Jam",
-      render: (value: string) => (value ? value.slice(0, 5) : "-"),
-    },
     { key: "lokasi_pertemuan", label: "Lokasi" },
     {
       key: "created_at",
@@ -124,24 +117,6 @@ export default function IcareGroupsPage() {
       type: "select" as const,
       required: false,
       options: leaderOptions,
-    },
-    {
-      name: "hari_pertemuan",
-      label: "Hari Pertemuan",
-      type: "select" as const,
-      required: false,
-      options: [
-        { value: "", label: "— Pilih Hari —" },
-        ...["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"].map(
-          (d) => ({ value: d, label: d }),
-        ),
-      ],
-    },
-    {
-      name: "jam_pertemuan",
-      label: "Jam Pertemuan",
-      type: "time" as const,
-      required: false,
     },
     {
       name: "lokasi_pertemuan",
@@ -177,8 +152,6 @@ export default function IcareGroupsPage() {
     const payload = {
       nama_icare:       data.nama_icare as string,
       leader_id:        data.leader_id  || null,
-      hari_pertemuan:   data.hari_pertemuan   || null,
-      jam_pertemuan:    data.jam_pertemuan    || null,
       lokasi_pertemuan: data.lokasi_pertemuan || null,
       deskripsi:        data.deskripsi        || null,
     };
@@ -200,31 +173,26 @@ export default function IcareGroupsPage() {
   const handleImport = async (rows: Record<string, any>[]) => {
     const payload = rows.map((row) => ({
       nama_icare:       row.nama_icare,
-      hari_pertemuan:   row.hari_pertemuan?.trim()   || null,
-      jam_pertemuan:    row.jam_pertemuan?.trim()    || null,
       lokasi_pertemuan: row.lokasi_pertemuan?.trim() || null,
       deskripsi:        row.deskripsi?.trim()        || null,
       leader_id:        null,
     }));
     const { error } = await supabase.from("icare_groups").insert(payload);
     if (error) throw new Error(error.message);
+    triggerRefresh();
   };
 
-  return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-1">iCare Groups</h1>
-          <p className="text-sm text-gray-500">Kelola kelompok iCare dan penugasan leader</p>
-        </div>
-        <button
-          onClick={() => exportTemplate("iCare_Groups", ICARE_SCHEMA)}
-          className="text-sm text-gray-500 hover:text-blue-600 underline underline-offset-2"
-        >
-          Unduh Template Import
-        </button>
-      </div>
+  useSetPageActions({
+    addLabel: "iCare Group Baru",
+    onAdd: handleAdd,
+    exportTitle: "iCare_Groups",
+    exportSchema: ICARE_SCHEMA,
+    getItems: () => tableItemsRef.current,
+    onImport: handleImport,
+  });
 
+  return (
+    <div className="p-4">
       <MasterDataTable
         title="iCare Groups"
         endpoint="/api/icare-groups"
@@ -234,6 +202,7 @@ export default function IcareGroupsPage() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onImport={handleImport}
+        onItemsChange={(items) => { tableItemsRef.current = items; }}
         refreshTrigger={refreshTrigger}
       />
 

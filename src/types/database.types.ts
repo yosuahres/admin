@@ -375,7 +375,6 @@ export type Database = {
         Row: {
           created_at: string | null
           deskripsi: string | null
-          hari_pertemuan: string | null
           id: string
           jam_pertemuan: string | null
           leader_id: string | null
@@ -385,7 +384,6 @@ export type Database = {
         Insert: {
           created_at?: string | null
           deskripsi?: string | null
-          hari_pertemuan?: string | null
           id?: string
           jam_pertemuan?: string | null
           leader_id?: string | null
@@ -395,7 +393,6 @@ export type Database = {
         Update: {
           created_at?: string | null
           deskripsi?: string | null
-          hari_pertemuan?: string | null
           id?: string
           jam_pertemuan?: string | null
           leader_id?: string | null
