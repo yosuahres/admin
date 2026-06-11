@@ -15,6 +15,7 @@ import {
   UserPlus,
   Edit2,
   Trash2,
+  X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -198,7 +199,6 @@ export default function ReportsView({ role }: ReportsViewProps) {
 
   const handleClearFilters = () => {
     setFilters({});
-    setSearch("");
     setPage(1);
   };
 
@@ -206,7 +206,7 @@ export default function ReportsView({ role }: ReportsViewProps) {
     setLoading(true);
     try {
       const result = await runReportQuery(
-        supabase, config, filters, debouncedSearch, 1, 10000
+        supabase, config, filters, "", 1, 10000
       );
       const exportData = config.transformForExport
         ? config.transformForExport(result.data)
