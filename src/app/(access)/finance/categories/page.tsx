@@ -7,7 +7,7 @@ import type { Database } from "@/types/database.types";
 type Category = Database["public"]["Tables"]["cashflow_categories"]["Row"];
 type CategoryInsert = Database["public"]["Tables"]["cashflow_categories"]["Insert"];
 
-const TYPES = [
+const TYPES: { value: "in" | "out"; label: string }[] = [
   { value: "in", label: "Pemasukan" },
   { value: "out", label: "Pengeluaran" },
 ];
