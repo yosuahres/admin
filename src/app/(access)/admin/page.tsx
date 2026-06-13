@@ -6,8 +6,10 @@ import {
   CalendarDays,
   Church,
   PartyPopper,
+  TrendingDown,
   TrendingUp,
   Users,
+  Wallet,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import {
@@ -15,6 +17,9 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  ComposedChart,
+  Legend,
+  Line,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -113,8 +118,45 @@ function formatBirthDate(dob: string): string {
   });
 }
 
+// ---- Finance helpers ----
+function displayRupiah(n: number) {
+  const abs = Math.abs(n);
+  return (n < 0 ? "-" : "") + "Rp " + new Intl.NumberFormat("id-ID").format(abs);
+}
+function shortRupiah(n: number) {
+  const abs = Math.abs(n);
+  const sign = n < 0 ? "-" : "";
+  if (abs >= 1_000_000) return `${sign}${(abs / 1_000_000).toFixed(1)} jt`;
+  if (abs >= 1_000) return `${sign}${(abs / 1_000).toFixed(0)} rb`;
+  return String(n);
+}
+function formatMonthDate(dateStr: string) {
+  const MONTH_SHORT = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
+  const d = new Date(dateStr);
+  return `${MONTH_SHORT[d.getUTCMonth()]} '${String(d.getUTCFullYear()).slice(2)}`;
+}
+
+interface MonthlySummary { month: string | null; total_in: number | null; total_out: number | null; net: number | null; }
+interface TxRow {
+  id: string | null; transaction_date: string | null; description: string | null;
+  category_name: string | null; type: string | null; amount: number | null;
+}
+
 // ---- SWR fetcher ----
 const supabase = createClient();
+
+async function fetchFinanceData() {
+  const [{ data: monthly }, { data: cats }, { data: recent }] = await Promise.all([
+    supabase.from("cashflow_monthly_summary").select("month, total_in, total_out, net").order("month", { ascending: true }),
+    supabase.from("cashflow_transactions_view").select("type, category_name, amount"),
+    supabase.from("cashflow_transactions_view").select("id, transaction_date, description, category_name, type, amount").order("transaction_date", { ascending: false }).limit(5),
+  ]);
+  return {
+    monthly: (monthly ?? []) as MonthlySummary[],
+    cats: (cats ?? []) as Pick<TxRow, "type" | "category_name" | "amount">[],
+    recent: (recent ?? []) as TxRow[],
+  };
+}
 
 async function fetchDashboardData() {
   const [
@@ -271,6 +313,12 @@ export default function DashboardPage() {
     },
   );
 
+  const { data: finData, isLoading: finLoading } = useSWR(
+    "admin-finance",
+    fetchFinanceData,
+    { revalidateOnFocus: false, dedupingInterval: 300_000 },
+  );
+
   const jemaat = dashData?.jemaat ?? [];
   const groups = dashData?.groups ?? [];
   const members = dashData?.members ?? [];
@@ -415,16 +463,29 @@ export default function DashboardPage() {
       ? `${Math.round(((totalBaptized ?? 0) / jemaat.length) * 100)}% dari total`
       : undefined;
 
-  return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
-          Ringkasan data jemaat dan kelompok iCare
-        </p>
-      </div>
+  // Finance computed values
+  const finAnalytics = useMemo(() => {
+    let income = 0, expense = 0;
+    for (const m of finData?.monthly ?? []) {
+      income += Number(m.total_in ?? 0);
+      expense += Number(m.total_out ?? 0);
+    }
+    return { income, expense, net: income - expense };
+  }, [finData]);
 
+  const finMonthlyChart = useMemo(
+    () =>
+      (finData?.monthly ?? []).slice(-6).map((m) => ({
+        month: m.month ? formatMonthDate(m.month) : "—",
+        pemasukan: Number(m.total_in ?? 0),
+        pengeluaran: Number(m.total_out ?? 0),
+        saldo: Number(m.net ?? 0),
+      })),
+    [finData],
+  );
+
+  return (
+    <div className="p-6 space-y-6">
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
@@ -753,6 +814,180 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           )}
         </ChartCard>
+      </div>
+
+      {/* Finance Summary */}
+      <div>
+        <h2 className="text-base font-bold text-gray-800 mb-3">Ringkasan Keuangan</h2>
+
+        {/* Finance KPI cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          {finLoading ? (
+            [0, 1, 2].map((k) => (
+              <div key={k} className="h-20 bg-gray-100 rounded-xl animate-pulse" />
+            ))
+          ) : (
+            <>
+              <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-5 py-4">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-medium text-emerald-700">Total Pemasukan</span>
+                  <TrendingUp size={14} className="text-emerald-600" />
+                </div>
+                <p className="text-lg font-bold text-emerald-700 truncate">{displayRupiah(finAnalytics.income)}</p>
+              </div>
+              <div className="bg-red-50 border border-red-100 rounded-xl px-5 py-4">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-medium text-red-600">Total Pengeluaran</span>
+                  <TrendingDown size={14} className="text-red-500" />
+                </div>
+                <p className="text-lg font-bold text-red-600 truncate">{displayRupiah(finAnalytics.expense)}</p>
+              </div>
+              <div className={`border rounded-xl px-5 py-4 ${finAnalytics.net >= 0 ? "bg-blue-50 border-blue-100" : "bg-orange-50 border-orange-100"}`}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className={`text-xs font-medium ${finAnalytics.net >= 0 ? "text-blue-700" : "text-orange-700"}`}>Saldo Bersih</span>
+                  <Wallet size={14} className={finAnalytics.net >= 0 ? "text-blue-600" : "text-orange-600"} />
+                </div>
+                <p className={`text-lg font-bold truncate ${finAnalytics.net >= 0 ? "text-blue-700" : "text-orange-700"}`}>
+                  {displayRupiah(finAnalytics.net)}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Monthly trend charts */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {/* Pemasukan */}
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
+            <p className="text-sm font-semibold text-gray-800">Tren Pemasukan</p>
+            <p className="text-xs text-gray-400 mt-0.5">Jumlah pemasukan per bulan</p>
+            {finLoading ? (
+              <ChartSkeleton />
+            ) : finMonthlyChart.length === 0 ? (
+              <EmptyChart message="Belum ada data keuangan" />
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <ComposedChart data={finMonthlyChart} margin={{ top: 12, right: 8, left: -8, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#9CA3AF" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
+                  <YAxis tickFormatter={shortRupiah} tick={{ fontSize: 10, fill: "#9CA3AF" }} tickLine={false} axisLine={false} />
+                  <Tooltip
+                    contentStyle={{ borderRadius: "8px", border: "1px solid #E5E7EB", fontSize: 12 }}
+                    formatter={(val) => [displayRupiah(val as number), "Pemasukan"]}
+                  />
+                  <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} formatter={() => "Pemasukan"} />
+                  <Bar dataKey="pemasukan" fill="#10B981" radius={[4, 4, 0, 0]} barSize={32} />
+                  <Line
+                    type="monotone"
+                    dataKey="pemasukan"
+                    stroke="#F59E0B"
+                    strokeWidth={2}
+                    dot={{ fill: "#F59E0B", r: 4, strokeWidth: 0 }}
+                    activeDot={{ r: 6, fill: "#F59E0B" }}
+                    legendType="none"
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+
+          {/* Pengeluaran */}
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
+            <p className="text-sm font-semibold text-gray-800">Tren Pengeluaran</p>
+            <p className="text-xs text-gray-400 mt-0.5">Jumlah pengeluaran per bulan</p>
+            {finLoading ? (
+              <ChartSkeleton />
+            ) : finMonthlyChart.length === 0 ? (
+              <EmptyChart message="Belum ada data keuangan" />
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <ComposedChart data={finMonthlyChart} margin={{ top: 12, right: 8, left: -8, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#9CA3AF" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
+                  <YAxis tickFormatter={shortRupiah} tick={{ fontSize: 10, fill: "#9CA3AF" }} tickLine={false} axisLine={false} />
+                  <Tooltip
+                    contentStyle={{ borderRadius: "8px", border: "1px solid #E5E7EB", fontSize: 12 }}
+                    formatter={(val) => [displayRupiah(val as number), "Pengeluaran"]}
+                  />
+                  <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} formatter={() => "Pengeluaran"} />
+                  <Bar dataKey="pengeluaran" fill="#EF4444" radius={[4, 4, 0, 0]} barSize={32} />
+                  <Line
+                    type="monotone"
+                    dataKey="pengeluaran"
+                    stroke="#F59E0B"
+                    strokeWidth={2}
+                    dot={{ fill: "#F59E0B", r: 4, strokeWidth: 0 }}
+                    activeDot={{ r: 6, fill: "#F59E0B" }}
+                    legendType="none"
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+        {/* Recent transactions */}
+        <div className="flex flex-col w-full border border-gray-200 bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h3 className="text-sm font-semibold text-gray-700">Transaksi Terbaru</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-separate border-spacing-0">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="px-4 py-3 text-xs font-semibold text-black text-left">Tanggal</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-black text-left">Deskripsi</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-black text-left">Kategori</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-black text-left">Tipe</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-black text-right">Jumlah</th>
+                </tr>
+              </thead>
+              <tbody>
+                {finLoading ? (
+                  Array.from({ length: 5 }).map((_, k) => (
+                    <tr key={k} className="border-b border-gray-50">
+                      {[1, 2, 3, 4, 5].map((c) => (
+                        <td key={c} className="px-4 py-3">
+                          <div className="h-4 bg-gray-100 rounded animate-pulse" />
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ) : (finData?.recent ?? []).length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-10 text-gray-400 text-sm">Belum ada transaksi.</td>
+                  </tr>
+                ) : (
+                  (finData?.recent ?? []).map((t) => (
+                    <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
+                        {t.transaction_date
+                          ? new Date(t.transaction_date).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-800">{t.description ?? "—"}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500">
+                        {t.category_name
+                          ? <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-md">{t.category_name}</span>
+                          : <span className="text-gray-300">—</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${
+                          t.type === "in" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"
+                        }`}>
+                          {t.type === "in" ? "Masuk" : "Keluar"}
+                        </span>
+                      </td>
+                      <td className={`px-4 py-3 text-sm text-right font-bold ${t.type === "in" ? "text-green-600" : "text-red-500"}`}>
+                        {t.type === "in" ? "+" : "−"}{displayRupiah(Number(t.amount ?? 0))}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       {/* Birthday Widget */}

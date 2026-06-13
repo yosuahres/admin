@@ -1,5 +1,6 @@
 "use client";
 import { ChevronDown, ChevronUp, Home, LogOut, PanelLeftClose, PanelLeftOpen, Settings, X } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { type NavItem, navByRole } from "@/constants/navigation";
@@ -207,15 +208,15 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
                       const childActive = pathname === child.href;
                       const ChildIcon = child.icon;
                       return (
-                        <a
+                        <Link
                           key={child.href}
-                          href={child.href}
+                          href={child.href!}
                           className={`flex items-center gap-3 px-2.5 py-0.5 rounded-lg text-sm font-medium transition-colors
                             ${childActive ? "bg-gray-100 text-gray-900" : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"}`}
                         >
                           <ChildIcon size={15} className="shrink-0" />
                           <span className="whitespace-nowrap">{child.label}</span>
-                        </a>
+                        </Link>
                       );
                     })}
                   </div>
@@ -226,9 +227,9 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
 
           const active = pathname === href;
           return (
-            <a
+            <Link
               key={href}
-              href={href}
+              href={href!}
               title={effectiveCollapsed && !effectiveMobile ? label : undefined}
               className={`flex items-center gap-3 px-2.5 py-1 rounded-sm text-sm font-medium transition-colors
                 ${effectiveCollapsed && !effectiveMobile ? "justify-center" : ""}
@@ -238,7 +239,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
               {(!effectiveCollapsed || effectiveMobile) && (
                 <span className="whitespace-nowrap">{label}</span>
               )}
-            </a>
+            </Link>
           );
         })}
       </nav>
@@ -263,7 +264,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
               </div>
               {/* Menu items */}
               <div className="p-1">
-                <a
+                <Link
                   href="/setting/account"
                   className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-sm transition-colors ${
                     pathname === "/settings" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
@@ -271,14 +272,14 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
                 >
                   <Settings size={14} className="shrink-0" />
                   Settings
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/"
                   className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
                 >
                   <Home size={14} className="shrink-0" />
                   Home Page
-                </a>
+                </Link>
                 <div className="border-t border-gray-100 mt-1 pt-1">
                   <button
                     onClick={() => {

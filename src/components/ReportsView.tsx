@@ -2,6 +2,7 @@
 "use client";
 
 import {
+  Check,
   ChevronLeft,
   ChevronRight,
   ChevronsUpDown,
@@ -27,7 +28,7 @@ import type { ActiveFilters, ReportConfig } from "@/types/report.types";
 import { useSetPageActions } from "@/contexts/page-actions";
 
 interface ReportsViewProps {
-  role: "admin" | "leader";
+  role: "admin" | "leader" | "finance";
 }
 
 function IcareSummaryBar({ data }: { data: any[] }) {
@@ -115,6 +116,64 @@ function UsherSummaryBar({ data }: { data: any[] }) {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function ReportSelectorDropdown({
+  configs,
+  selectedId,
+  onChange,
+}: {
+  configs: ReportConfig[];
+  selectedId: string;
+  onChange: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const selected = configs.find((c) => c.id === selectedId) ?? configs[0];
+
+  return (
+    <div ref={ref} className="relative inline-flex">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 pl-3 pr-2.5 py-1.5 text-sm font-semibold border border-transparent rounded-lg bg-gray-100 text-gray-900 outline-none focus:ring-1 focus:ring-gray-300 cursor-pointer min-w-[160px]"
+      >
+        <span className="flex-1 text-left truncate">{selected.label}</span>
+        <ChevronsUpDown size={14} className="text-gray-400 shrink-0" />
+      </button>
+
+      {open && (
+        <div className="absolute z-50 mt-1 top-full left-0 w-full min-w-max bg-white border border-gray-200 rounded-xl shadow-lg py-1 max-h-60 overflow-y-auto">
+          {configs.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => { onChange(c.id); setOpen(false); }}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors text-left ${
+                c.id === selectedId
+                  ? "bg-gray-100 font-semibold text-gray-900"
+                  : "text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              {c.id === selectedId && (
+                <Check size={13} className="text-gray-900 shrink-0" />
+              )}
+              <span className={c.id === selectedId ? "" : "ml-[17px]"}>{c.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -226,7 +285,9 @@ export default function ReportsView({ role }: ReportsViewProps) {
     const initialValues: Record<string, any> = {};
     config.columns.forEach((col) => {
       if (col.editable) {
-        initialValues[col.key] = row[col.key] ?? "";
+        const raw = row[col.key] ?? "";
+        // Convert boolean to string so <select> can match option values
+        initialValues[col.key] = col.valueType === "boolean" ? String(raw) : raw;
       }
     });
     setEditValues(initialValues);
@@ -236,12 +297,23 @@ export default function ReportsView({ role }: ReportsViewProps) {
     if (!editingRow || !editingRow.id) return;
     setSaving(true);
     try {
+      // Coerce values back to their proper types before sending
+      const coerced: Record<string, any> = { ...editValues };
+      config.columns.forEach((col) => {
+        if (!col.editable || !(col.key in coerced)) return;
+        if (col.valueType === "boolean") {
+          coerced[col.key] = coerced[col.key] === "true";
+        } else if (col.valueType === "number" || col.inputType === "number") {
+          const n = Number(coerced[col.key]);
+          coerced[col.key] = isNaN(n) ? coerced[col.key] : n;
+        }
+      });
       const response = await fetch(
         `/api/reports/${config.id}/${editingRow.id}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editValues),
+          body: JSON.stringify(coerced),
         }
       );
       if (!response.ok) throw new Error("Failed to update");
@@ -280,18 +352,11 @@ export default function ReportsView({ role }: ReportsViewProps) {
   return (
     <div className="p-4 space-y-5">
       <div className="flex items-center justify-between gap-4">
-        <div className="relative inline-flex items-center">
-          <select
-            value={selectedConfigId}
-            onChange={(e) => setSelectedConfigId(e.target.value)}
-            className="appearance-none pl-3 pr-8 py-1.5 text-sm font-semibold border border-transparent rounded-lg bg-gray-100 text-gray-900 outline-none focus:ring-1 focus:ring-gray-300 cursor-pointer min-w-[160px]"
-          >
-            {availableConfigs.map((c) => (
-              <option key={c.id} value={c.id}>{c.label}</option>
-            ))}
-          </select>
-          <ChevronsUpDown size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-        </div>
+        <ReportSelectorDropdown
+          configs={availableConfigs}
+          selectedId={selectedConfigId}
+          onChange={setSelectedConfigId}
+        />
 
         <div className="flex items-center gap-3">
           {activeFilterCount > 0 && (
@@ -534,7 +599,7 @@ export default function ReportsView({ role }: ReportsViewProps) {
               <button
                 onClick={handleEditSave}
                 disabled={saving}
-                className="flex-1 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40 transition-colors"
+                className="flex-1 px-4 py-2 text-sm font-medium bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-40 transition-colors"
               >
                 {saving ? "Menyimpan..." : "Simpan"}
               </button>

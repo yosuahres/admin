@@ -1,5 +1,6 @@
 "use client";
 import { ArrowLeft, PanelLeftClose, PanelLeftOpen, User, X } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -118,7 +119,7 @@ export default function SettingsSidebar({ mobileOpen = false, onMobileClose }: S
       </div>
 
       <nav className="flex flex-col gap-0.5 p-2 flex-1">
-        <a
+        <Link
           href="/setting/account"
           title={effectiveCollapsed && !effectiveMobile ? "Account" : undefined}
           className={`flex items-center gap-3 px-2.5 py-1.5 rounded-sm text-sm font-medium transition-colors ${
@@ -129,11 +130,11 @@ export default function SettingsSidebar({ mobileOpen = false, onMobileClose }: S
         >
           <User size={17} className="shrink-0" />
           {(!effectiveCollapsed || effectiveMobile) && <span>Account</span>}
-        </a>
+        </Link>
       </nav>
 
       <div className="border-t border-gray-200 p-2 relative" ref={dropdownRef}>
-        <a
+        <Link
           href="/admin"
           title={effectiveCollapsed && !effectiveMobile ? "Back to Dashboard" : undefined}
           className={`flex items-center gap-3 px-2.5 py-1.5 rounded-sm text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors mb-1 ${
@@ -142,7 +143,7 @@ export default function SettingsSidebar({ mobileOpen = false, onMobileClose }: S
         >
           <ArrowLeft size={17} className="shrink-0" />
           {(!effectiveCollapsed || effectiveMobile) && <span className="whitespace-nowrap">Back to Dashboard</span>}
-        </a>
+        </Link>
       </div>
     </aside>
   );

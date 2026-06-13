@@ -20,6 +20,7 @@ export interface ColumnConfig {
   editable?: boolean;
   inputType?: "text" | "number" | "date" | "email" | "textarea" | "select";
   options?: { value: string; label: string }[];
+  valueType?: "boolean" | "number";
 }
 
 export interface ReportConfig {
@@ -31,7 +32,7 @@ export interface ReportConfig {
   defaultSort: { column: string; ascending: boolean };
   filters: FilterConfig[];
   columns: ColumnConfig[];
-  allowedRoles?: Array<"admin" | "leader">;  // ← new: omit = visible to all roles
+  allowedRoles?: Array<"admin" | "leader" | "finance">;
   transformForExport?: (rows: any[]) => any[];
 }
 

@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  ArrowLeftRight,
+  BarChart2,
   BookOpen,
   Calendar,
   Church,
@@ -54,8 +56,8 @@ export const financeNav: NavItem[] = [
   //     { href: "/finance/cashflow", label: "Cash Report", icon: BookOpen },
   //   ],
   // },
-  { href: "/finance/categories", label: "Categories", icon: BookOpen },
-  { href: "/finance/cashflow", label: "Cashflow", icon: BookOpen },
+  { href: "/finance/cashflow", label: "Cashflow", icon: ArrowLeftRight },
+  { href: "/finance/reporting", label: "Reporting", icon: BarChart2 },
 ];
 
 export const usherNav: NavItem[] = [

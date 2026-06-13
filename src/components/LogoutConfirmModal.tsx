@@ -41,8 +41,6 @@ export default function LogoutConfirmModal({
       />
 
       <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-modal-in">
-        <div className="h-1 w-full bg-gradient-to-r from-red-400 via-red-500 to-rose-500" />
-
         <div className="p-6">
           <button
             onClick={onCancel}
@@ -76,7 +74,7 @@ export default function LogoutConfirmModal({
             </button>
             <button
               onClick={onConfirm}
-              className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-red-500 hover:bg-red-600 active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+              className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-zinc-900 hover:bg-black active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700"
             >
               Sign out
             </button>

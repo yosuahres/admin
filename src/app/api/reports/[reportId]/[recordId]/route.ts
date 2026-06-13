@@ -16,6 +16,8 @@ export async function PATCH(
       icare_report: "icare_meetings",
       usher_attendance: "attendance_reports",
       events: "events",
+      cashflow_transactions: "cashflow_transactions",
+      cashflow_categories: "cashflow_categories",
     };
 
     const tableName = tableMap[reportId];
@@ -63,6 +65,8 @@ export async function DELETE(
       icare_report: "icare_meetings",
       usher_attendance: "attendance_reports",
       events: "events",
+      cashflow_transactions: "cashflow_transactions",
+      cashflow_categories: "cashflow_categories",
     };
 
     const tableName = tableMap[reportId];

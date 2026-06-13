@@ -242,9 +242,15 @@ export default function JemaatPage() {
     {
       name: "discipleship_stage",
       label: "Tahap Pemuridan",
-      type: "text" as const,
+      type: "select" as const,
       required: false,
-      placeholder: "e.g. Foundation",
+      options: [
+        { value: "", label: "— Pilih Tahap —" },
+        { value: "Come", label: "Come" },
+        { value: "Grow", label: "Grow" },
+        { value: "Serve", label: "Serve" },
+        { value: "Lead", label: "Lead" },
+      ],
     },
     {
       name: "notes",

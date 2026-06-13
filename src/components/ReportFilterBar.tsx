@@ -4,6 +4,7 @@
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { FilterConfig, ActiveFilters } from "@/types/report.types";
+import { CalendarRangePicker } from "@/components/CalendarRangePicker";
 
 interface Props {
   filters: FilterConfig[];
@@ -57,30 +58,22 @@ function FilterInput({
         />
       );
 
-    case "date_range":
+    case "date_range": {
+      const hasVal = !!(value?.from || value?.to);
       return (
-        <div className="col-span-2 flex items-center gap-1">
-          <input
-            type="date"
-            title={`${filter.label} dari`}
-            value={value?.from ?? ""}
-            onChange={(e) =>
-              onChange({ ...(value ?? {}), from: e.target.value || undefined })
-            }
-            className={baseCls + " pr-4 text-xs"}
-          />
-          <span className="text-gray-300 text-xs shrink-0">–</span>
-          <input
-            type="date"
-            title={`${filter.label} sampai`}
-            value={value?.to ?? ""}
-            onChange={(e) =>
-              onChange({ ...(value ?? {}), to: e.target.value || undefined })
-            }
-            className={baseCls + " pr-4 text-xs"}
-          />
-        </div>
+        <CalendarRangePicker
+          from={value?.from}
+          to={value?.to}
+          label={filter.label}
+          onChange={(f, t) => onChange(!f && !t ? undefined : { from: f, to: t })}
+          buttonClassName={`w-full flex items-center pl-3 pr-2.5 py-1.5 text-sm border rounded-lg outline-none cursor-pointer transition-colors ${
+            hasVal
+              ? "bg-blue-50 text-blue-700 font-semibold border-blue-200"
+              : "bg-gray-100 text-gray-500 font-normal border-transparent hover:bg-gray-200"
+          }`}
+        />
       );
+    }
 
     case "number_range":
       return (

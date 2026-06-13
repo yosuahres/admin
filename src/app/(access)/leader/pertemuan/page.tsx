@@ -470,7 +470,7 @@ export default function PertemuanPage() {
                   Batal
                 </button>
                 <button onClick={handleSave} disabled={submitting}
-                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-lg">
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-black hover:bg-gray-800 disabled:opacity-60 text-white rounded-lg">
                   {submitting && <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                   {submitting ? "Menyimpan..." : "Simpan"}
                 </button>

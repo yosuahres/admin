@@ -236,7 +236,7 @@ export default function ImportButton({
                     step === "importing" ||
                     !result?.data.length
                   }
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-40"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-black text-white rounded-md hover:bg-gray-800 disabled:opacity-40"
                 >
                   {step === "importing" ? (
                     <>

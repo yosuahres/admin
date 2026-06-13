@@ -55,8 +55,13 @@ export const REPORT_CONFIGS: ReportConfig[] = [
       {
         key: "discipleship_stage",
         label: "Tahap Pemuridan",
-        type: "text",
-        placeholder: "Cari tahap pemuridan...",
+        type: "multiselect",
+        options: [
+          { value: "Come",  label: "Come" },
+          { value: "Grow",  label: "Grow" },
+          { value: "Serve", label: "Serve" },
+          { value: "Lead",  label: "Lead" },
+        ],
       },
       {
         key: "alamat",
@@ -76,17 +81,31 @@ export const REPORT_CONFIGS: ReportConfig[] = [
       },
     ],
     columns: [
-      { key: "nama_lengkap", label: "Nama Lengkap" },
-      { key: "email",        label: "Email" },
-      { key: "phone_number", label: "No. Telepon" },
+      { key: "nama_lengkap", label: "Nama Lengkap", editable: true, inputType: "text" },
+      { key: "email",        label: "Email",         editable: true, inputType: "email" },
+      { key: "phone_number", label: "No. Telepon",   editable: true, inputType: "text" },
       {
         key: "gender",
         label: "Gender",
+        editable: true,
+        inputType: "select",
+        options: [
+          { value: "L", label: "Laki-laki" },
+          { value: "P", label: "Perempuan" },
+        ],
         render: (v) => (v === "L" ? "Laki-laki" : v === "P" ? "Perempuan" : "-"),
       },
       {
         key: "status_jemaat",
         label: "Status",
+        editable: true,
+        inputType: "select",
+        options: [
+          { value: "aktif",       label: "Aktif" },
+          { value: "tidak aktif", label: "Tidak Aktif" },
+          { value: "pindah",      label: "Pindah" },
+          { value: "meninggal",   label: "Meninggal" },
+        ],
         render: (v) => (
           <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
             v === "aktif"       ? "bg-green-100 text-green-800" :
@@ -100,6 +119,13 @@ export const REPORT_CONFIGS: ReportConfig[] = [
       {
         key: "is_baptized",
         label: "Baptis",
+        editable: true,
+        inputType: "select",
+        valueType: "boolean",
+        options: [
+          { value: "true",  label: "Sudah Baptis" },
+          { value: "false", label: "Belum Baptis" },
+        ],
         render: (v) => (
           <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
             v ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-500"
@@ -108,14 +134,38 @@ export const REPORT_CONFIGS: ReportConfig[] = [
           </span>
         ),
       },
-      { key: "marital_status",     label: "Status Nikah" },
-      { key: "discipleship_stage", label: "Pemuridan" },
+      {
+        key: "marital_status",
+        label: "Status Nikah",
+        editable: true,
+        inputType: "select",
+        options: [
+          { value: "single",   label: "Single" },
+          { value: "married",  label: "Menikah" },
+          { value: "divorced", label: "Cerai" },
+          { value: "widowed",  label: "Janda/Duda" },
+        ],
+      },
+      {
+        key: "discipleship_stage",
+        label: "Pemuridan",
+        editable: true,
+        inputType: "select",
+        options: [
+          { value: "Come",  label: "Come" },
+          { value: "Grow",  label: "Grow" },
+          { value: "Serve", label: "Serve" },
+          { value: "Lead",  label: "Lead" },
+        ],
+      },
       {
         key: "tanggal_join",
         label: "Tanggal Join",
+        editable: true,
+        inputType: "date",
         render: (v) => v ? new Date(v).toLocaleDateString("id-ID") : "-",
       },
-      { key: "alamat", label: "Alamat" },
+      { key: "alamat", label: "Alamat", editable: true, inputType: "textarea" },
     ],
   },
 
@@ -380,6 +430,118 @@ export const REPORT_CONFIGS: ReportConfig[] = [
             : "-",
       },
     ],
+  },
+
+  // ─── FINANCE: CASHFLOW TRANSACTIONS ────────────────────────────────────────
+  {
+    id: "cashflow_transactions",
+    label: "Transaksi Keuangan",
+    allowedRoles: ["finance", "admin"],
+    table: "cashflow_transactions_view",
+    select: "*",
+    searchColumn: "description",
+    defaultSort: { column: "transaction_date", ascending: false },
+    filters: [
+      {
+        key: "type",
+        label: "Tipe",
+        type: "select",
+        options: [
+          { value: "in",  label: "Masuk (Pemasukan)" },
+          { value: "out", label: "Keluar (Pengeluaran)" },
+        ],
+      },
+      {
+        key: "transaction_date",
+        label: "Tanggal",
+        type: "date_range",
+      },
+      {
+        key: "amount",
+        label: "Jumlah",
+        type: "number_range",
+      },
+    ],
+    columns: [
+      {
+        key: "transaction_date",
+        label: "Tanggal",
+        editable: true,
+        inputType: "date",
+        render: (v) =>
+          v
+            ? new Date(v).toLocaleDateString("id-ID", {
+                day: "numeric", month: "short", year: "numeric",
+              })
+            : "-",
+      },
+      { key: "description", label: "Deskripsi", editable: true, inputType: "text" },
+      {
+        key: "category_name",
+        label: "Kategori",
+        render: (v) =>
+          v ? (
+            <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-lg">
+              {v}
+            </span>
+          ) : (
+            <span className="text-gray-300">—</span>
+          ),
+      },
+      {
+        key: "type",
+        label: "Tipe",
+        editable: true,
+        inputType: "select",
+        options: [
+          { value: "in",  label: "Masuk (Pemasukan)" },
+          { value: "out", label: "Keluar (Pengeluaran)" },
+        ],
+        render: (v) => (
+          <span
+            className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${
+              v === "in"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                : "bg-red-50 text-red-600 border-red-200"
+            }`}
+          >
+            {v === "in" ? "Masuk" : "Keluar"}
+          </span>
+        ),
+      },
+      {
+        key: "amount",
+        label: "Jumlah",
+        editable: true,
+        inputType: "number",
+        render: (v, row) => (
+          <span
+            className={`font-semibold tabular-nums ${
+              row.type === "in" ? "text-emerald-600" : "text-red-600"
+            }`}
+          >
+            {row.type === "out" ? "−" : "+"}Rp{" "}
+            {Number(v ?? 0).toLocaleString("id-ID")}
+          </span>
+        ),
+      },
+      { key: "reference_no", label: "No. Ref",  editable: true, inputType: "text" },
+      { key: "notes",        label: "Catatan",  editable: true, inputType: "textarea" },
+    ],
+    transformForExport: (rows: any[]) =>
+      rows.map((row) => ({
+        "Tanggal": row.transaction_date
+          ? new Date(row.transaction_date).toLocaleDateString("id-ID", {
+              day: "numeric", month: "long", year: "numeric",
+            })
+          : "-",
+        "Deskripsi":       row.description    ?? "-",
+        "Kategori":        row.category_name  ?? "-",
+        "Tipe":            row.type === "in"  ? "Masuk" : "Keluar",
+        "Jumlah":          Number(row.amount  ?? 0),
+        "No. Referensi":   row.reference_no   ?? "-",
+        "Catatan":         row.notes          ?? "-",
+      })),
   },
 
   // ─── EVENTS ────────────────────────────────────────────────────────────────
