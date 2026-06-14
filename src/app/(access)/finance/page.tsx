@@ -50,6 +50,160 @@ function ChartSkeleton() {
   return <div className="h-52 bg-gray-100 rounded-xl animate-pulse" />;
 }
 
+const DAYS_ID = ["Min","Sen","Sel","Rab","Kam","Jum","Sab"];
+const MONTHS_ID = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+function CalendarPicker({
+  customFrom, customTo, setCustomFrom, setCustomTo,
+  calendarYear, calendarMonth, setCalendarYear, setCalendarMonth,
+  hoverDate, setHoverDate, onApply,
+}: {
+  customFrom: string; customTo: string;
+  setCustomFrom: (v: string) => void; setCustomTo: (v: string) => void;
+  calendarYear: number; calendarMonth: number;
+  setCalendarYear: (v: number) => void; setCalendarMonth: (v: number) => void;
+  hoverDate: string | null; setHoverDate: (v: string | null) => void;
+  onApply: () => void;
+}) {
+  const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+  function toDateStr(y: number, m: number, d: number) {
+    return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  }
+
+  function handleDayClick(dateStr: string) {
+    if (!customFrom || (customFrom && customTo)) {
+      setCustomFrom(dateStr);
+      setCustomTo("");
+    } else {
+      if (dateStr < customFrom) {
+        setCustomTo(customFrom);
+        setCustomFrom(dateStr);
+      } else {
+        setCustomTo(dateStr);
+      }
+    }
+  }
+
+  function isInRange(dateStr: string) {
+    const end = customTo || hoverDate;
+    if (!customFrom || !end) return false;
+    const [from, to] = customFrom <= end ? [customFrom, end] : [end, customFrom];
+    return dateStr > from && dateStr < to;
+  }
+
+  function isStart(dateStr: string) { return dateStr === customFrom; }
+  function isEnd(dateStr: string) { return dateStr === customTo; }
+  function isHover(dateStr: string) { return !customTo && dateStr === hoverDate; }
+
+  function prevMonth() {
+    if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(calendarYear - 1); }
+    else setCalendarMonth(calendarMonth - 1);
+  }
+  function nextMonth() {
+    if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(calendarYear + 1); }
+    else setCalendarMonth(calendarMonth + 1);
+  }
+
+  const emptyCells = Array.from({ length: firstDay }, (_, i) => ({ key: `e${i}`, empty: true as const }));
+  const dayCells = Array.from({ length: daysInMonth }, (_, i) => ({ key: `d${i + 1}`, day: i + 1, empty: false as const }));
+  const cells = [...emptyCells, ...dayCells];
+
+  return (
+    <div className="px-3 pt-2 pb-3 border-t border-gray-100 mt-1 w-56">
+      {/* Month nav */}
+      <div className="flex items-center justify-between mb-2">
+        <button onClick={prevMonth} className="p-1 rounded hover:bg-gray-100 transition-colors text-gray-500">
+          <ChevronDownIcon size={12} className="rotate-90" />
+        </button>
+        <span className="text-xs font-semibold text-gray-700">
+          {MONTHS_ID[calendarMonth]} {calendarYear}
+        </span>
+        <button onClick={nextMonth} className="p-1 rounded hover:bg-gray-100 transition-colors text-gray-500">
+          <ChevronDownIcon size={12} className="-rotate-90" />
+        </button>
+      </div>
+
+      {/* Day labels */}
+      <div className="grid grid-cols-7 mb-1">
+        {DAYS_ID.map((d) => (
+          <div key={d} className="text-center text-[9px] font-semibold text-gray-400 py-0.5">{d}</div>
+        ))}
+      </div>
+
+      {/* Date cells */}
+      <div className="grid grid-cols-7 gap-y-0.5">
+        {cells.map((cell) => {
+          if (cell.empty) return <div key={cell.key} />;
+          const dateStr = toDateStr(calendarYear, calendarMonth, cell.day);
+          const start = isStart(dateStr);
+          const end = isEnd(dateStr);
+          const inRange = isInRange(dateStr);
+          const hover = isHover(dateStr);
+
+          return (
+            <button
+              key={cell.key}
+              onClick={() => handleDayClick(dateStr)}
+              onMouseEnter={() => setHoverDate(dateStr)}
+              onMouseLeave={() => setHoverDate(null)}
+              className={[
+                "text-[10px] h-6 w-full flex items-center justify-center transition-colors",
+                start || end
+                  ? "bg-blue-500 text-white rounded-full font-semibold z-10"
+                  : inRange
+                  ? "bg-blue-50 text-blue-700 rounded-none"
+                  : hover
+                  ? "bg-blue-100 text-blue-600 rounded-full"
+                  : "text-gray-700 hover:bg-gray-100 rounded-full",
+              ].join(" ")}
+            >
+              {cell.day}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Range display */}
+      {(customFrom || customTo) && (
+        <div className="mt-2 pt-2 border-t border-gray-100 text-[10px] text-gray-500 flex justify-between items-center gap-1">
+          <span className="truncate">
+            {customFrom
+              ? new Date(customFrom + "T00:00:00").toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
+              : "—"}
+          </span>
+          <span className="text-gray-300 shrink-0">→</span>
+          <span className="truncate text-right">
+            {customTo
+              ? new Date(customTo + "T00:00:00").toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
+              : "Pilih akhir"}
+          </span>
+        </div>
+      )}
+
+      {/* Apply */}
+      <button
+        onClick={() => { if (customFrom && customTo) onApply(); }}
+        disabled={!customFrom || !customTo}
+        className="w-full mt-2 text-xs font-medium bg-blue-500 text-white rounded-md py-1.5 hover:bg-blue-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        Terapkan
+      </button>
+
+      {/* Reset */}
+      {(customFrom || customTo) && (
+        <button
+          onClick={() => { setCustomFrom(""); setCustomTo(""); }}
+          className="w-full mt-1 text-[10px] text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          Reset pilihan
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function FinanceDashboardPage() {
   const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -60,6 +214,9 @@ export default function FinanceDashboardPage() {
   const [filterRange, setFilterRange] = useState<RangeOption>("all");
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
+  const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
+  const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
+  const [hoverDate, setHoverDate] = useState<string | null>(null);
   const rangeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -107,7 +264,6 @@ export default function FinanceDashboardPage() {
     setLoading(false);
   }
 
-  // All-time KPIs from summing all monthly rows
   const analytics = useMemo(() => {
     let income = 0, expense = 0;
     for (const m of allMonthly) {
@@ -134,7 +290,7 @@ export default function FinanceDashboardPage() {
     if (filterRange === "custom") {
       if (!customFrom) return monthlyChartData;
       return monthlyChartData.filter((m) => {
-        const d = m.rawMonth.slice(0, 7);
+        const d = m.rawMonth.slice(0, 10);
         return d >= customFrom && (!customTo || d <= customTo);
       });
     }
@@ -183,18 +339,20 @@ export default function FinanceDashboardPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border border-gray-200 rounded-lg bg-white shadow-sm text-gray-600 hover:bg-gray-50 transition-colors"
           >
             <CalendarDays size={13} className="text-gray-400" />
-            {filterRange === "all" ? "All time" : filterRange === "3m" ? "3 bulan" : filterRange === "6m" ? "6 bulan" : filterRange === "12m" ? "12 bulan" : "Custom"}
+            {filterRange === "all" ? "All time" : filterRange === "3m" ? "3 bulan" : filterRange === "6m" ? "6 bulan" : filterRange === "12m" ? "12 bulan" : customFrom && customTo ? `${new Date(customFrom + "T00:00:00").toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} – ${new Date(customTo + "T00:00:00").toLocaleDateString("id-ID", { day: "2-digit", month: "short" })}` : "Custom"}
             {rangeOpen ? <ChevronUp size={13} /> : <ChevronDownIcon size={13} />}
           </button>
 
           {rangeOpen && (
-            <div className="absolute right-0 mt-1.5 w-44 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1.5 overflow-hidden">
+            <div className="absolute left-0 mt-1.5 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1.5 overflow-hidden"
+              style={{ minWidth: "11rem" }}
+            >
               {(
                 [
-                  { key: "all",    label: "All time",   dot: "#9CA3AF" },
-                  { key: "3m",     label: "3 bulan",    dot: "#3B82F6" },
-                  { key: "6m",     label: "6 bulan",    dot: "#8B5CF6" },
-                  { key: "12m",    label: "12 bulan",   dot: "#EC4899" },
+                  { key: "all",    label: "All time",    dot: "#9CA3AF" },
+                  { key: "3m",     label: "3 bulan",     dot: "#3B82F6" },
+                  { key: "6m",     label: "6 bulan",     dot: "#8B5CF6" },
+                  { key: "12m",    label: "12 bulan",    dot: "#EC4899" },
                   { key: "custom", label: "Custom range", dot: "#F59E0B" },
                 ] as { key: RangeOption; label: string; dot: string }[]
               ).map(({ key, label, dot }) => (
@@ -211,28 +369,19 @@ export default function FinanceDashboardPage() {
               ))}
 
               {filterRange === "custom" && (
-                <div className="px-3 pt-1 pb-2 border-t border-gray-100 mt-1 flex flex-col gap-1.5">
-                  <input
-                    type="month"
-                    value={customFrom}
-                    onChange={(e) => setCustomFrom(e.target.value)}
-                    className="w-full text-xs border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
-                    placeholder="Dari"
-                  />
-                  <input
-                    type="month"
-                    value={customTo}
-                    onChange={(e) => setCustomTo(e.target.value)}
-                    className="w-full text-xs border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
-                    placeholder="Sampai"
-                  />
-                  <button
-                    onClick={() => setRangeOpen(false)}
-                    className="w-full text-xs font-medium bg-blue-500 text-white rounded-md py-1 hover:bg-blue-600 transition-colors mt-0.5"
-                  >
-                    Terapkan
-                  </button>
-                </div>
+                <CalendarPicker
+                  customFrom={customFrom}
+                  customTo={customTo}
+                  setCustomFrom={setCustomFrom}
+                  setCustomTo={setCustomTo}
+                  calendarYear={calendarYear}
+                  calendarMonth={calendarMonth}
+                  setCalendarYear={setCalendarYear}
+                  setCalendarMonth={setCalendarMonth}
+                  hoverDate={hoverDate}
+                  setHoverDate={setHoverDate}
+                  onApply={() => setRangeOpen(false)}
+                />
               )}
             </div>
           )}
@@ -290,7 +439,6 @@ export default function FinanceDashboardPage() {
 
       {/* Monthly trend charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {/* Pemasukan */}
         <div className="bg-white border border-gray-200 rounded-xl p-4">
           <p className="text-sm font-semibold text-gray-800">Tren Pemasukan</p>
           <p className="text-xs text-gray-400 mt-0.5">Jumlah pemasukan per bulan</p>
@@ -324,7 +472,6 @@ export default function FinanceDashboardPage() {
           )}
         </div>
 
-        {/* Pengeluaran */}
         <div className="bg-white border border-gray-200 rounded-xl p-4">
           <p className="text-sm font-semibold text-gray-800">Tren Pengeluaran</p>
           <p className="text-xs text-gray-400 mt-0.5">Jumlah pengeluaran per bulan</p>
