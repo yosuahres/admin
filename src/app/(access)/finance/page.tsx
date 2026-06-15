@@ -208,7 +208,7 @@ export default function FinanceDashboardPage() {
   const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
   const [allMonthly, setAllMonthly] = useState<MonthlySummaryRow[]>([]);
-  const [catData, setCatData] = useState<Pick<TxViewRow, "type" | "category_name" | "amount">[]>([]);
+  const [catData, setCatData] = useState<Pick<TxViewRow, "type" | "category_name" | "amount" | "transaction_date">[]>([]);
   const [recentTx, setRecentTx] = useState<TxViewRow[]>([]);
   const [rangeOpen, setRangeOpen] = useState(false);
   const [filterRange, setFilterRange] = useState<RangeOption>("all");
@@ -250,7 +250,7 @@ export default function FinanceDashboardPage() {
         .order("month", { ascending: true }),
       supabase
         .from("cashflow_transactions_view")
-        .select("type, category_name, amount"),
+        .select("type, category_name, amount, transaction_date"),
       supabase
         .from("cashflow_transactions_view")
         .select("*")
@@ -263,15 +263,6 @@ export default function FinanceDashboardPage() {
     if (recent) setRecentTx(recent);
     setLoading(false);
   }
-
-  const analytics = useMemo(() => {
-    let income = 0, expense = 0;
-    for (const m of allMonthly) {
-      income += Number(m.total_in ?? 0);
-      expense += Number(m.total_out ?? 0);
-    }
-    return { income, expense, net: income - expense, count: catData.length };
-  }, [allMonthly, catData]);
 
   const monthlyChartData = useMemo(
     () =>
@@ -300,9 +291,33 @@ export default function FinanceDashboardPage() {
     return monthlyChartData.filter((m) => m.rawMonth && new Date(m.rawMonth) >= cutoff);
   }, [filterRange, monthlyChartData, customFrom, customTo]);
 
+  const filteredCatData = useMemo(() => {
+    if (filterRange === "all") return catData;
+    if (filterRange === "custom") {
+      if (!customFrom) return catData;
+      return catData.filter((t) => {
+        const d = t.transaction_date?.slice(0, 10) ?? "";
+        return d >= customFrom && (!customTo || d <= customTo);
+      });
+    }
+    const months = filterRange === "3m" ? 3 : filterRange === "6m" ? 6 : 12;
+    const now = new Date();
+    const cutoff = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
+    return catData.filter((t) => t.transaction_date && new Date(t.transaction_date) >= cutoff);
+  }, [filterRange, catData, customFrom, customTo]);
+
+  const analytics = useMemo(() => {
+    let income = 0, expense = 0;
+    for (const m of filteredChartData) {
+      income += m.pemasukan;
+      expense += m.pengeluaran;
+    }
+    return { income, expense, net: income - expense, count: filteredCatData.length };
+  }, [filteredChartData, filteredCatData]);
+
   const incomeByCategory = useMemo(() => {
     const map: Record<string, number> = {};
-    for (const t of catData) {
+    for (const t of filteredCatData) {
       if (t.type !== "in") continue;
       const cat = t.category_name ?? "Lainnya";
       map[cat] = (map[cat] ?? 0) + Number(t.amount ?? 0);
@@ -310,11 +325,11 @@ export default function FinanceDashboardPage() {
     return Object.entries(map)
       .map(([name, value], i) => ({ name, value, fill: CAT_COLORS[i % CAT_COLORS.length] }))
       .sort((a, b) => b.value - a.value);
-  }, [catData]);
+  }, [filteredCatData]);
 
   const expenseByCategory = useMemo(() => {
     const map: Record<string, number> = {};
-    for (const t of catData) {
+    for (const t of filteredCatData) {
       if (t.type !== "out") continue;
       const cat = t.category_name ?? "Lainnya";
       map[cat] = (map[cat] ?? 0) + Number(t.amount ?? 0);
@@ -322,7 +337,7 @@ export default function FinanceDashboardPage() {
     return Object.entries(map)
       .map(([name, value], i) => ({ name, value, fill: EXP_COLORS[i % EXP_COLORS.length] }))
       .sort((a, b) => b.value - a.value);
-  }, [catData]);
+  }, [filteredCatData]);
 
   const incomeCatTotal = incomeByCategory.reduce((s, d) => s + d.value, 0);
   const expenseCatTotal = expenseByCategory.reduce((s, d) => s + d.value, 0);
@@ -431,7 +446,7 @@ export default function FinanceDashboardPage() {
                 <CalendarDays size={13} className="text-gray-400" />
               </div>
               <p className="text-base font-bold text-gray-800">{analytics.count}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{allMonthly.length} bulan tercatat</p>
+              <p className="text-xs text-gray-400 mt-0.5">{filteredChartData.length} bulan tercatat</p>
             </div>
           </>
         )}

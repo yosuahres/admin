@@ -4,6 +4,8 @@ import {
   Award,
   Cake,
   CalendarDays,
+  ChevronDown,
+  ChevronUp,
   Church,
   PartyPopper,
   TrendingDown,
@@ -11,7 +13,7 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -134,6 +136,132 @@ function formatMonthDate(dateStr: string) {
   const MONTH_SHORT = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
   const d = new Date(dateStr);
   return `${MONTH_SHORT[d.getUTCMonth()]} '${String(d.getUTCFullYear()).slice(2)}`;
+}
+
+type RangeOption = "all" | "7d" | "30d" | "3m" | "6m" | "12m" | "custom";
+
+const DAYS_ID = ["Min","Sen","Sel","Rab","Kam","Jum","Sab"];
+const MONTHS_ID_LONG = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+function CalendarPicker({
+  customFrom, customTo, setCustomFrom, setCustomTo,
+  calendarYear, calendarMonth, setCalendarYear, setCalendarMonth,
+  hoverDate, setHoverDate, onApply,
+}: {
+  customFrom: string; customTo: string;
+  setCustomFrom: (v: string) => void; setCustomTo: (v: string) => void;
+  calendarYear: number; calendarMonth: number;
+  setCalendarYear: (v: number) => void; setCalendarMonth: (v: number) => void;
+  hoverDate: string | null; setHoverDate: (v: string | null) => void;
+  onApply: () => void;
+}) {
+  const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+  function toDateStr(y: number, m: number, d: number) {
+    return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  }
+
+  function handleDayClick(dateStr: string) {
+    if (!customFrom || (customFrom && customTo)) {
+      setCustomFrom(dateStr); setCustomTo("");
+    } else {
+      if (dateStr < customFrom) { setCustomTo(customFrom); setCustomFrom(dateStr); }
+      else setCustomTo(dateStr);
+    }
+  }
+
+  function isInRange(dateStr: string) {
+    const end = customTo || hoverDate;
+    if (!customFrom || !end) return false;
+    const [from, to] = customFrom <= end ? [customFrom, end] : [end, customFrom];
+    return dateStr > from && dateStr < to;
+  }
+
+  function prevMonth() {
+    if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(calendarYear - 1); }
+    else setCalendarMonth(calendarMonth - 1);
+  }
+  function nextMonth() {
+    if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(calendarYear + 1); }
+    else setCalendarMonth(calendarMonth + 1);
+  }
+
+  const emptyCells = Array.from({ length: firstDay }, (_, i) => ({ key: `e${i}`, empty: true as const }));
+  const dayCells = Array.from({ length: daysInMonth }, (_, i) => ({ key: `d${i + 1}`, day: i + 1, empty: false as const }));
+  const cells = [...emptyCells, ...dayCells];
+
+  return (
+    <div className="px-3 pt-2 pb-3 border-t border-gray-100 mt-1 w-56">
+      <div className="flex items-center justify-between mb-2">
+        <button onClick={prevMonth} className="p-1 rounded hover:bg-gray-100 transition-colors text-gray-500">
+          <ChevronDown size={12} className="rotate-90" />
+        </button>
+        <span className="text-xs font-semibold text-gray-700">{MONTHS_ID_LONG[calendarMonth]} {calendarYear}</span>
+        <button onClick={nextMonth} className="p-1 rounded hover:bg-gray-100 transition-colors text-gray-500">
+          <ChevronDown size={12} className="-rotate-90" />
+        </button>
+      </div>
+      <div className="grid grid-cols-7 mb-1">
+        {DAYS_ID.map((d) => (
+          <div key={d} className="text-center text-[9px] font-semibold text-gray-400 py-0.5">{d}</div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-y-0.5">
+        {cells.map((cell) => {
+          if (cell.empty) return <div key={cell.key} />;
+          const dateStr = toDateStr(calendarYear, calendarMonth, cell.day);
+          const start = dateStr === customFrom;
+          const end = dateStr === customTo;
+          const inRange = isInRange(dateStr);
+          const hover = !customTo && dateStr === hoverDate;
+          return (
+            <button
+              key={cell.key}
+              onClick={() => handleDayClick(dateStr)}
+              onMouseEnter={() => setHoverDate(dateStr)}
+              onMouseLeave={() => setHoverDate(null)}
+              className={[
+                "text-[10px] h-6 w-full flex items-center justify-center transition-colors",
+                start || end ? "bg-blue-500 text-white rounded-full font-semibold z-10"
+                  : inRange ? "bg-blue-50 text-blue-700 rounded-none"
+                  : hover ? "bg-blue-100 text-blue-600 rounded-full"
+                  : "text-gray-700 hover:bg-gray-100 rounded-full",
+              ].join(" ")}
+            >
+              {cell.day}
+            </button>
+          );
+        })}
+      </div>
+      {(customFrom || customTo) && (
+        <div className="mt-2 pt-2 border-t border-gray-100 text-[10px] text-gray-500 flex justify-between items-center gap-1">
+          <span className="truncate">
+            {customFrom ? new Date(customFrom + "T00:00:00").toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+          </span>
+          <span className="text-gray-300 shrink-0">→</span>
+          <span className="truncate text-right">
+            {customTo ? new Date(customTo + "T00:00:00").toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "Pilih akhir"}
+          </span>
+        </div>
+      )}
+      <button
+        onClick={() => { if (customFrom && customTo) onApply(); }}
+        disabled={!customFrom || !customTo}
+        className="w-full mt-2 text-xs font-medium bg-blue-500 text-white rounded-md py-1.5 hover:bg-blue-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        Terapkan
+      </button>
+      {(customFrom || customTo) && (
+        <button
+          onClick={() => { setCustomFrom(""); setCustomTo(""); }}
+          className="w-full mt-1 text-[10px] text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          Reset pilihan
+        </button>
+      )}
+    </div>
+  );
 }
 
 interface MonthlySummary { month: string | null; total_in: number | null; total_out: number | null; net: number | null; }
@@ -304,6 +432,23 @@ export default function DashboardPage() {
     if (role !== "admin") window.location.href = "/login";
   }, []);
 
+  const [filterRange, setFilterRange] = useState<RangeOption>("all");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+  const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
+  const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
+  const [hoverDate, setHoverDate] = useState<string | null>(null);
+  const [rangeOpen, setRangeOpen] = useState(false);
+  const rangeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (rangeRef.current && !rangeRef.current.contains(e.target as Node)) setRangeOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   const { data: dashData, isLoading } = useSWR(
     "admin-dashboard",
     fetchDashboardData,
@@ -332,17 +477,32 @@ export default function DashboardPage() {
     : null;
   const totalGroups = dashData ? groups.length : null;
 
-  const newThisMonth = useMemo(() => {
+  const newInRange = useMemo(() => {
     if (!dashData) return null;
     const now = new Date();
+    if (filterRange === "all") {
+      return jemaat.filter((j) => j.tanggal_join).length;
+    }
+    if (filterRange === "custom") {
+      return jemaat.filter((j) => {
+        if (!j.tanggal_join) return false;
+        const ds = j.tanggal_join.slice(0, 10);
+        return ds >= customFrom && (!customTo || ds <= customTo);
+      }).length;
+    }
+    const cutoff = getRangeCutoff(filterRange);
+    if (!cutoff) {
+      return jemaat.filter((j) => {
+        if (!j.tanggal_join) return false;
+        const d = new Date(j.tanggal_join);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      }).length;
+    }
     return jemaat.filter((j) => {
       if (!j.tanggal_join) return false;
-      const d = new Date(j.tanggal_join);
-      return (
-        d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-      );
+      return new Date(j.tanggal_join) >= cutoff;
     }).length;
-  }, [dashData, jemaat]);
+  }, [dashData, jemaat, filterRange, customFrom, customTo]);
 
   // Birthday
   const birthdays: BirthdayPerson[] = useMemo(
@@ -362,22 +522,66 @@ export default function DashboardPage() {
   );
   const todayCount = birthdays.filter((b) => b.daysUntil === 0).length;
 
-  // Member growth – last 6 months
+  // Member growth — filtered by date range
   const growthData = useMemo(() => {
     const now = new Date();
-    return Array.from({ length: 6 }, (_, i) => {
-      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+    let cutoffDate: Date | null = null;
+    let fromDate = "";
+    let toDate = "";
+
+    if (filterRange === "custom") {
+      fromDate = customFrom;
+      toDate = customTo;
+    } else {
+      cutoffDate = getRangeCutoff(filterRange);
+    }
+
+    // Determine the set of months to display
+    let monthsToShow: Date[] = [];
+    if (filterRange === "all") {
+      // find earliest tanggal_join
+      const dates = jemaat.map((j) => j.tanggal_join).filter(Boolean) as string[];
+      if (dates.length === 0) {
+        monthsToShow = Array.from({ length: 6 }, (_, i) => new Date(now.getFullYear(), now.getMonth() - (5 - i), 1));
+      } else {
+        const earliest = new Date(dates.sort()[0]);
+        const start = new Date(earliest.getFullYear(), earliest.getMonth(), 1);
+        const end = new Date(now.getFullYear(), now.getMonth(), 1);
+        const m = start;
+        while (m <= end) {
+          monthsToShow.push(new Date(m));
+          m.setMonth(m.getMonth() + 1);
+        }
+      }
+    } else if (filterRange === "custom" && fromDate) {
+      const start = new Date(fromDate.slice(0, 7) + "-01");
+      const endD = toDate ? new Date(toDate.slice(0, 7) + "-01") : new Date(now.getFullYear(), now.getMonth(), 1);
+      const m = new Date(start);
+      while (m <= endD) {
+        monthsToShow.push(new Date(m));
+        m.setMonth(m.getMonth() + 1);
+      }
+    } else {
+      const numMonths = filterRange === "7d" ? 1 : filterRange === "30d" ? 2 : filterRange === "3m" ? 3 : filterRange === "6m" ? 6 : 12;
+      monthsToShow = Array.from({ length: numMonths }, (_, i) => new Date(now.getFullYear(), now.getMonth() - (numMonths - 1 - i), 1));
+    }
+
+    return monthsToShow.map((d) => {
       const label = `${MONTH_ID[d.getMonth()]} ${d.getFullYear()}`;
       const baru = jemaat.filter((j) => {
         if (!j.tanggal_join) return false;
         const jd = new Date(j.tanggal_join);
-        return (
-          jd.getMonth() === d.getMonth() && jd.getFullYear() === d.getFullYear()
-        );
+        if (filterRange === "custom") {
+          const ds = j.tanggal_join.slice(0, 10);
+          return ds >= fromDate && (!toDate || ds <= toDate) &&
+            jd.getMonth() === d.getMonth() && jd.getFullYear() === d.getFullYear();
+        }
+        if (cutoffDate && jd < cutoffDate) return false;
+        return jd.getMonth() === d.getMonth() && jd.getFullYear() === d.getFullYear();
       }).length;
       return { month: label, baru };
     });
-  }, [jemaat]);
+  }, [jemaat, filterRange, customFrom, customTo]);
 
   // Status distribution
   const statusData = useMemo(() => {
@@ -475,17 +679,108 @@ export default function DashboardPage() {
 
   const finMonthlyChart = useMemo(
     () =>
-      (finData?.monthly ?? []).slice(-6).map((m) => ({
+      (finData?.monthly ?? []).map((m) => ({
         month: m.month ? formatMonthDate(m.month) : "—",
         pemasukan: Number(m.total_in ?? 0),
         pengeluaran: Number(m.total_out ?? 0),
         saldo: Number(m.net ?? 0),
+        rawMonth: m.month ?? "",
       })),
     [finData],
   );
 
+  function getRangeCutoff(range: RangeOption): Date | null {
+    const now = new Date();
+    if (range === "7d") return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+    if (range === "30d") return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29);
+    if (range === "3m") return new Date(now.getFullYear(), now.getMonth() - 2, 1);
+    if (range === "6m") return new Date(now.getFullYear(), now.getMonth() - 5, 1);
+    if (range === "12m") return new Date(now.getFullYear(), now.getMonth() - 11, 1);
+    return null;
+  }
+
+  const filteredFinChart = useMemo(() => {
+    if (filterRange === "all") return finMonthlyChart;
+    if (filterRange === "custom") {
+      if (!customFrom) return finMonthlyChart;
+      return finMonthlyChart.filter((m) => {
+        const d = m.rawMonth.slice(0, 10);
+        return d >= customFrom && (!customTo || d <= customTo);
+      });
+    }
+    const cutoff = getRangeCutoff(filterRange);
+    if (!cutoff) return finMonthlyChart;
+    return finMonthlyChart.filter((m) => m.rawMonth && new Date(m.rawMonth) >= cutoff);
+  }, [filterRange, finMonthlyChart, customFrom, customTo]);
+
+  const rangeLabel =
+    filterRange === "all" ? "All time"
+    : filterRange === "7d" ? "7 hari"
+    : filterRange === "30d" ? "30 hari"
+    : filterRange === "3m" ? "3 bulan"
+    : filterRange === "6m" ? "6 bulan"
+    : filterRange === "12m" ? "12 bulan"
+    : customFrom && customTo
+      ? `${new Date(customFrom + "T00:00:00").toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} – ${new Date(customTo + "T00:00:00").toLocaleDateString("id-ID", { day: "2-digit", month: "short" })}`
+      : "Custom";
+
+  const newInRangeLabel =
+    filterRange === "all" ? "Total bergabung"
+    : filterRange === "7d" ? "Bergabung 7 hari"
+    : filterRange === "30d" ? "Bergabung 30 hari"
+    : filterRange === "3m" ? "Bergabung 3 bulan"
+    : filterRange === "6m" ? "Bergabung 6 bulan"
+    : filterRange === "12m" ? "Bergabung 12 bulan"
+    : "Bergabung";
+
   return (
     <div className="p-6 space-y-6">
+      {/* Date filter */}
+      <div className="flex items-center justify-between">
+        <div ref={rangeRef} className="relative">
+          <button
+            onClick={() => setRangeOpen((v) => !v)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border border-gray-200 rounded-lg bg-white shadow-sm text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            <CalendarDays size={13} className="text-gray-400" />
+            {rangeLabel}
+            {rangeOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+          </button>
+          {rangeOpen && (
+            <div className="absolute left-0 mt-1.5 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1.5" style={{ minWidth: "11rem" }}>
+              {([
+                { key: "all",    label: "All time",      dot: "#9CA3AF" },
+                { key: "7d",     label: "7 hari",        dot: "#06B6D4" },
+                { key: "30d",    label: "30 hari",       dot: "#10B981" },
+                { key: "3m",     label: "3 bulan",       dot: "#3B82F6" },
+                { key: "6m",     label: "6 bulan",       dot: "#8B5CF6" },
+                { key: "12m",    label: "12 bulan",      dot: "#EC4899" },
+                { key: "custom", label: "Custom range",  dot: "#F59E0B" },
+              ] as { key: RangeOption; label: string; dot: string }[]).map(({ key, label, dot }) => (
+                <button
+                  key={key}
+                  onClick={() => { setFilterRange(key); if (key !== "custom") setRangeOpen(false); }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${filterRange === key ? "bg-gray-50 font-medium text-gray-900" : "text-gray-700 hover:bg-gray-50"}`}
+                >
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: dot }} />
+                  {label}
+                </button>
+              ))}
+              {filterRange === "custom" && (
+                <CalendarPicker
+                  customFrom={customFrom} customTo={customTo}
+                  setCustomFrom={setCustomFrom} setCustomTo={setCustomTo}
+                  calendarYear={calendarYear} calendarMonth={calendarMonth}
+                  setCalendarYear={setCalendarYear} setCalendarMonth={setCalendarMonth}
+                  hoverDate={hoverDate} setHoverDate={setHoverDate}
+                  onApply={() => setRangeOpen(false)}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
@@ -513,9 +808,9 @@ export default function DashboardPage() {
         />
         <KpiCard
           icon={TrendingUp}
-          label="Baru Bulan Ini"
-          value={isLoading ? null : (newThisMonth ?? 0)}
-          sub="bergabung"
+          label={newInRangeLabel}
+          value={isLoading ? null : (newInRange ?? 0)}
+          sub="orang"
           iconBg="bg-orange-500"
         />
       </div>
@@ -523,7 +818,7 @@ export default function DashboardPage() {
       {/* Row 2: Growth bar + Status pie */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <ChartCard
-          title="Jemaat Baru per Bulan (6 Bulan Terakhir)"
+          title={`Jemaat Baru per Bulan${filterRange !== "all" ? ` · ${rangeLabel}` : ""}`}
           className="lg:col-span-2"
         >
           {isLoading ? (
@@ -863,11 +1158,11 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-400 mt-0.5">Jumlah pemasukan per bulan</p>
             {finLoading ? (
               <ChartSkeleton />
-            ) : finMonthlyChart.length === 0 ? (
+            ) : filteredFinChart.length === 0 ? (
               <EmptyChart message="Belum ada data keuangan" />
             ) : (
               <ResponsiveContainer width="100%" height={200}>
-                <ComposedChart data={finMonthlyChart} margin={{ top: 12, right: 8, left: -8, bottom: 0 }}>
+                <ComposedChart data={filteredFinChart} margin={{ top: 12, right: 8, left: -8, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
                   <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#9CA3AF" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
                   <YAxis tickFormatter={shortRupiah} tick={{ fontSize: 10, fill: "#9CA3AF" }} tickLine={false} axisLine={false} />
@@ -897,11 +1192,11 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-400 mt-0.5">Jumlah pengeluaran per bulan</p>
             {finLoading ? (
               <ChartSkeleton />
-            ) : finMonthlyChart.length === 0 ? (
+            ) : filteredFinChart.length === 0 ? (
               <EmptyChart message="Belum ada data keuangan" />
             ) : (
               <ResponsiveContainer width="100%" height={200}>
-                <ComposedChart data={finMonthlyChart} margin={{ top: 12, right: 8, left: -8, bottom: 0 }}>
+                <ComposedChart data={filteredFinChart} margin={{ top: 12, right: 8, left: -8, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
                   <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#9CA3AF" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
                   <YAxis tickFormatter={shortRupiah} tick={{ fontSize: 10, fill: "#9CA3AF" }} tickLine={false} axisLine={false} />
