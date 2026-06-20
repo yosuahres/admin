@@ -66,9 +66,15 @@ export const usherNav: NavItem[] = [
   { href: "/usher/attendance/history", label: "History", icon: BookOpen },
 ];
 
+export const pastorNav: NavItem[] = [
+  { href: "/pastor", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/pastor/reports", label: "Reports", icon: BookOpen },
+];
+
 export const navByRole: Record<string, NavItem[]> = {
   admin: adminNav,
   leader: leaderNav,
   finance: financeNav,
   usher: usherNav,
+  pastor: pastorNav,
 };

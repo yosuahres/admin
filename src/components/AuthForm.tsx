@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 const roleRedirect: Record<string, string> = {
   admin: "/admin",
   leader: "/leader",
-  pastor: "/",
+  pastor: "/pastor",
   finance: "/finance",
   usher: "/usher",
 };

@@ -45,7 +45,8 @@ export async function middleware(request: NextRequest) {
     (pathname.startsWith("/admin") ||
       pathname.startsWith("/leader") ||
       pathname.startsWith("/usher") ||
-      pathname.startsWith("/finance"))
+      pathname.startsWith("/finance") ||
+      pathname.startsWith("/pastor"))
   ) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
@@ -64,7 +65,8 @@ export async function middleware(request: NextRequest) {
       (pathname.startsWith("/admin") ||
         pathname.startsWith("/leader") ||
         pathname.startsWith("/usher") ||
-        pathname.startsWith("/finance"))
+        pathname.startsWith("/finance") ||
+        pathname.startsWith("/pastor"))
     ) {
       return NextResponse.redirect(
         new URL("/login?error=unauthorized", request.url),
@@ -84,6 +86,22 @@ export async function middleware(request: NextRequest) {
     // Redirect usher away from non-usher routes
     if (role === "usher" && (pathname.startsWith("/admin") || pathname.startsWith("/leader"))) {
       return NextResponse.redirect(new URL("/usher", request.url));
+    }
+
+    // Redirect pastor away from non-pastor routes
+    if (role === "pastor" && (pathname.startsWith("/admin") || pathname.startsWith("/leader") || pathname.startsWith("/usher") || pathname.startsWith("/finance"))) {
+      return NextResponse.redirect(new URL("/pastor", request.url));
+    }
+
+    // Guard /pastor route — only pastor role allowed
+    if (pathname.startsWith("/pastor") && role !== "pastor") {
+      const dest =
+        role === "admin" ? "/admin"
+        : role === "leader" ? "/leader"
+        : role === "finance" ? "/finance"
+        : role === "usher" ? "/usher"
+        : "/login?error=unauthorized";
+      return NextResponse.redirect(new URL(dest, request.url));
     }
 
     // Guard /finance route — only admin and finance roles allowed
@@ -127,6 +145,8 @@ export async function middleware(request: NextRequest) {
           ? "/usher"
           : role === "finance"
           ? "/finance"
+          : role === "pastor"
+          ? "/pastor"
           : "/login";
       return NextResponse.redirect(new URL(dest, request.url));
     }
