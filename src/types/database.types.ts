@@ -511,9 +511,7 @@ export type Database = {
           notes: string | null
           phone_number: string | null
           photo_url: string | null
-          status_jemaat:
-            | Database["public"]["Enums"]["status_jemaat_type"]
-            | null
+          status_jemaat: string | null
           tanggal_baptis: string | null
           tanggal_join: string | null
           user_id: string | null
@@ -532,9 +530,7 @@ export type Database = {
           notes?: string | null
           phone_number?: string | null
           photo_url?: string | null
-          status_jemaat?:
-            | Database["public"]["Enums"]["status_jemaat_type"]
-            | null
+          status_jemaat?: string | null
           tanggal_baptis?: string | null
           tanggal_join?: string | null
           user_id?: string | null
@@ -553,9 +549,7 @@ export type Database = {
           notes?: string | null
           phone_number?: string | null
           photo_url?: string | null
-          status_jemaat?:
-            | Database["public"]["Enums"]["status_jemaat_type"]
-            | null
+          status_jemaat?: string | null
           tanggal_baptis?: string | null
           tanggal_join?: string | null
           user_id?: string | null
@@ -680,7 +674,7 @@ export type Database = {
       }
     }
     Enums: {
-      status_jemaat_type: "aktif" | "tidak aktif" | "pindah" | "meninggal"
+      status_jemaat_type: "aktif" | "tidak aktif" | "pindah" | "meninggal" | "tidak di batam"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -808,7 +802,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      status_jemaat_type: ["aktif", "tidak aktif", "pindah", "meninggal"],
+      status_jemaat_type: ["aktif", "tidak aktif", "pindah", "meninggal", "tidak di batam"],
     },
   },
 } as const

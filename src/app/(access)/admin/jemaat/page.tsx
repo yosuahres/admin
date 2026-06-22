@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/types/database.types";
 
 type Jemaat = Database["public"]["Tables"]["jemaat"]["Row"];
-type StatusJemaat = Database["public"]["Enums"]["status_jemaat_type"];
+type StatusJemaat = "aktif" | "tidak aktif" | "pindah" | "meninggal" | "tidak di batam";
 type ProfileOption = { value: string; label: string };
 
 const JEMAAT_SCHEMA: ColumnSchema[] = [
