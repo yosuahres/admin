@@ -52,12 +52,14 @@ const STATUS_COLORS: Record<string, string> = {
   "tidak aktif": "#9CA3AF",
   pindah: "#3B82F6",
   meninggal: "#F87171",
+  "tidak di batam": "#F59E0B",
 };
 const STATUS_LABELS: Record<string, string> = {
   aktif: "Aktif",
   "tidak aktif": "Tidak Aktif",
   pindah: "Pindah",
   meninggal: "Meninggal",
+  "tidak di batam": "Tidak di Batam",
 };
 const GENDER_COLORS = ["#3B82F6", "#EC4899", "#9CA3AF"];
 

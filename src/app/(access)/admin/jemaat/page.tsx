@@ -213,6 +213,7 @@ export default function JemaatPage() {
         { value: "tidak aktif", label: "Tidak Aktif" },
         { value: "pindah", label: "Pindah" },
         { value: "meninggal", label: "Meninggal" },
+        { value: "tidak di batam", label: "Tidak di Batam" },
       ],
     },
     {

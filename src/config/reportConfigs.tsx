@@ -26,10 +26,11 @@ export const REPORT_CONFIGS: ReportConfig[] = [
         label: "Status Jemaat",
         type: "multiselect",
         options: [
-          { value: "aktif",       label: "Aktif" },
-          { value: "tidak aktif", label: "Tidak Aktif" },
-          { value: "pindah",      label: "Pindah" },
-          { value: "meninggal",   label: "Meninggal" },
+          { value: "aktif",          label: "Aktif" },
+          { value: "tidak aktif",    label: "Tidak Aktif" },
+          { value: "pindah",         label: "Pindah" },
+          { value: "meninggal",      label: "Meninggal" },
+          { value: "tidak di batam", label: "Tidak di Batam" },
         ],
       },
       {
@@ -101,10 +102,11 @@ export const REPORT_CONFIGS: ReportConfig[] = [
         editable: true,
         inputType: "select",
         options: [
-          { value: "aktif",       label: "Aktif" },
-          { value: "tidak aktif", label: "Tidak Aktif" },
-          { value: "pindah",      label: "Pindah" },
-          { value: "meninggal",   label: "Meninggal" },
+          { value: "aktif",          label: "Aktif" },
+          { value: "tidak aktif",    label: "Tidak Aktif" },
+          { value: "pindah",         label: "Pindah" },
+          { value: "meninggal",      label: "Meninggal" },
+          { value: "tidak di batam", label: "Tidak di Batam" },
         ],
         render: (v) => (
           <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
