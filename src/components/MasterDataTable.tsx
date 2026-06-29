@@ -109,7 +109,7 @@ export default function MasterDataTable<T = any>({
   const { data: swrResult, isLoading, isValidating } = useSWR(
     [fetchUrl, refreshTrigger],
     () => fetchFromBackend(fetchUrl),
-    { keepPreviousData: true, revalidateOnFocus: false, dedupingInterval: 2000 },
+    { keepPreviousData: true, revalidateOnFocus: false, revalidateIfStale: false, dedupingInterval: 30_000 },
   );
 
   const items: any[] = swrResult?.data ?? [];
