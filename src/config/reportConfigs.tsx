@@ -288,11 +288,11 @@ export const REPORT_CONFIGS: ReportConfig[] = [
       total_visitors,
       notes,
       submitted_at,
-      event_occurrences(
+      event_occurrences!inner(
         occurrence_date,
         start_time,
         end_time,
-        events(event_name, event_type, location)
+        events!inner(event_name, event_type, location)
       )
     `,
     searchColumn: "notes",
@@ -302,6 +302,15 @@ export const REPORT_CONFIGS: ReportConfig[] = [
         key: "submitted_at",
         label: "Tanggal Laporan",
         type: "date_range",
+      },
+      {
+        key: "event_occurrences.events.event_type",
+        label: "Tipe Event",
+        type: "multiselect",
+        options: [
+          "Ibadah Umum","Ibadah Pemuda","Ibadah Anak","Retreat",
+          "Seminar","Konser","Baptisan","Pernikahan","Lainnya",
+        ].map((d) => ({ value: d, label: d })),
       },
       {
         key: "total_members",
