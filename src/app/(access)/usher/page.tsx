@@ -23,6 +23,24 @@ import {
   YAxis,
 } from "recharts";
 import { createClient } from "@/lib/supabase/client";
+import ReportFilterBar from "@/components/ReportFilterBar";
+import type { ActiveFilters, FilterConfig } from "@/types/report.types";
+
+// ── Filters (mirrors admin "Kehadiran Ibadah" report) ─────────────────────────
+const EVENT_TYPES = [
+  "Ibadah Umum", "Ibadah Pemuda", "Ibadah Anak", "Retreat",
+  "Seminar", "Konser", "Baptisan", "Pernikahan", "Lainnya",
+];
+
+const DASHBOARD_FILTERS: FilterConfig[] = [
+  { key: "date_range", label: "Tanggal Ibadah", type: "date_range" },
+  {
+    key: "event_type",
+    label: "Tipe Event",
+    type: "multiselect",
+    options: EVENT_TYPES.map((d) => ({ value: d, label: d })),
+  },
+];
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type AttendanceReport = {
@@ -30,6 +48,7 @@ type AttendanceReport = {
   submitted_at: string;
   total_members: number;
   total_visitors: number;
+  total_kids: number;
   is_official: boolean;
   occurrence_id: string;
   event_occurrences: {
@@ -139,6 +158,8 @@ export default function UsherDashboardPage() {
   const [reports, setReports] = useState<AttendanceReport[]>([]);
   const [upcoming, setUpcoming] = useState<UpcomingOccurrence[]>([]);
   const [loading, setLoading] = useState(true);
+  const [upcomingLoading, setUpcomingLoading] = useState(true);
+  const [filters, setFilters] = useState<ActiveFilters>({});
 
   useEffect(() => {
     const role = localStorage.getItem("role");
@@ -146,44 +167,86 @@ export default function UsherDashboardPage() {
     else window.location.href = "/login";
   }, []);
 
+  // Upcoming events — loaded once (not affected by filters)
   useEffect(() => {
     if (!authorized) return;
-    loadDashboard();
+    loadUpcoming();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authorized]);
 
-  const loadDashboard = async () => {
-    setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoading(false); return; }
+  // Reports (KPIs, chart, table) — reloaded whenever filters change
+  useEffect(() => {
+    if (!authorized) return;
+    loadReports();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authorized, filters]);
 
+  const loadUpcoming = async () => {
+    setUpcomingLoading(true);
     const now = new Date();
     const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     const nextWeek = new Date(today);
     nextWeek.setUTCDate(nextWeek.getUTCDate() + 7);
 
-    const [{ data: rData }, { data: uData }] = await Promise.all([
-      supabase
-        .from("attendance_reports")
-        .select(
-          "id, submitted_at, total_members, total_visitors, is_official, occurrence_id, event_occurrences(occurrence_date, start_time, events(event_name, event_type))"
-        )
-        .eq("submitted_by", user.id)
-        .order("submitted_at", { ascending: false })
-        .limit(50),
-      supabase
-        .from("event_occurrences")
-        .select("id, occurrence_date, start_time, events(event_name, event_type)")
-        .eq("is_cancelled", false)
-        .gte("occurrence_date", today.toISOString().split("T")[0])
-        .lte("occurrence_date", nextWeek.toISOString().split("T")[0])
-        .order("occurrence_date", { ascending: true }),
-    ]);
+    const { data } = await supabase
+      .from("event_occurrences")
+      .select("id, occurrence_date, start_time, events(event_name, event_type)")
+      .eq("is_cancelled", false)
+      .gte("occurrence_date", today.toISOString().split("T")[0])
+      .lte("occurrence_date", nextWeek.toISOString().split("T")[0])
+      .order("occurrence_date", { ascending: true });
 
-    setReports((rData as any) ?? []);
-    setUpcoming((uData as any) ?? []);
+    setUpcoming((data as any) ?? []);
+    setUpcomingLoading(false);
+  };
+
+  const loadReports = async () => {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setLoading(false); return; }
+
+    let query = supabase
+      .from("attendance_reports")
+      .select(
+        "id, submitted_at, total_members, total_visitors, total_kids, is_official, occurrence_id, event_occurrences!inner(occurrence_date, start_time, events!inner(event_name, event_type))"
+      )
+      .eq("submitted_by", user.id);
+
+    // Date range on the occurrence (worship) date
+    const dateRange = filters.date_range as { from?: string; to?: string } | undefined;
+    if (dateRange?.from) query = query.gte("event_occurrences.occurrence_date", dateRange.from);
+    if (dateRange?.to)   query = query.lte("event_occurrences.occurrence_date", dateRange.to);
+
+    // Event type
+    const eventTypes = filters.event_type as string[] | undefined;
+    if (Array.isArray(eventTypes) && eventTypes.length > 0) {
+      query = query.in("event_occurrences.events.event_type", eventTypes);
+    }
+
+    const { data } = await query
+      .order("submitted_at", { ascending: false })
+      .limit(50);
+
+    setReports((data as any) ?? []);
     setLoading(false);
   };
+
+  const handleFilterChange = (key: string, value: any) => {
+    setFilters((prev) => {
+      const next = { ...prev };
+      if (
+        value === undefined || value === null || value === "" ||
+        (Array.isArray(value) && value.length === 0)
+      ) {
+        delete next[key];
+      } else {
+        next[key] = value;
+      }
+      return next;
+    });
+  };
+
+  const clearFilters = () => setFilters({});
 
   // ── Computed values ──────────────────────────────────────────────────────
   const kpis = useMemo(() => {
@@ -191,10 +254,11 @@ export default function UsherDashboardPage() {
     const totalReports = reports.length;
     const totalMembers = reports.reduce((s, r) => s + r.total_members, 0);
     const totalVisitors = reports.reduce((s, r) => s + r.total_visitors, 0);
+    const totalKids = reports.reduce((s, r) => s + r.total_kids, 0);
     const avgTotal = totalReports > 0
-      ? Math.round((totalMembers + totalVisitors) / totalReports)
+      ? Math.round((totalMembers + totalVisitors + totalKids) / totalReports)
       : 0;
-    return { totalReports, totalMembers, totalVisitors, avgTotal };
+    return { totalReports, totalMembers, totalVisitors, totalKids, avgTotal };
   }, [reports, loading]);
 
   const reportedIds = useMemo(
@@ -214,7 +278,8 @@ export default function UsherDashboardPage() {
             : "—",
           jemaat: r.total_members,
           tamu: r.total_visitors,
-          total: r.total_members + r.total_visitors,
+          anak: r.total_kids,
+          total: r.total_members + r.total_visitors + r.total_kids,
         })),
     [reports]
   );
@@ -223,11 +288,33 @@ export default function UsherDashboardPage() {
 
   if (!authorized) return null;
 
+  const activeFilterCount = Object.keys(filters).length;
+
   return (
     <div className="p-6 space-y-6">
 
+      {/* Filters */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-3">
+          {activeFilterCount > 0 && (
+            <button
+              onClick={clearFilters}
+              className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
+            >
+              Reset {activeFilterCount} filter
+            </button>
+          )}
+        </div>
+        <ReportFilterBar
+          filters={DASHBOARD_FILTERS}
+          values={filters}
+          onChange={handleFilterChange}
+          onClear={clearFilters}
+        />
+      </div>
+
       {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <KpiCard
           icon={ClipboardList}
           label="Total Laporan Saya"
@@ -260,6 +347,14 @@ export default function UsherDashboardPage() {
           iconBg="bg-orange-500"
           loading={loading}
         />
+        <KpiCard
+          icon={Users}
+          label="Total Anak"
+          value={kpis?.totalKids.toLocaleString("id-ID") ?? null}
+          sub="anak hadir"
+          iconBg="bg-teal-500"
+          loading={loading}
+        />
       </div>
 
       {/* Upcoming events + Trend chart */}
@@ -279,7 +374,7 @@ export default function UsherDashboardPage() {
           }
         >
           <div className="p-4 space-y-2">
-            {loading ? (
+            {upcomingLoading ? (
               [1, 2, 3].map((k) => <Skeleton key={k} className="h-14" />)
             ) : upcoming.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-8 text-center">
@@ -365,11 +460,12 @@ export default function UsherDashboardPage() {
                     }}
                     formatter={(val, name) => [
                       `${val} orang`,
-                      name === "jemaat" ? "Jemaat" : "Tamu",
+                      name === "jemaat" ? "Jemaat" : name === "tamu" ? "Tamu" : "Anak",
                     ]}
                   />
                   <Bar dataKey="jemaat" stackId="a" fill="#3B82F6" radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="tamu" stackId="a" fill="#A78BFA" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="tamu" stackId="a" fill="#A78BFA" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="anak" stackId="a" fill="#34D399" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -382,6 +478,10 @@ export default function UsherDashboardPage() {
                 <div className="flex items-center gap-1.5 text-xs text-gray-500">
                   <span className="w-2.5 h-2.5 rounded-sm bg-violet-400 shrink-0" />
                   Tamu
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400 shrink-0" />
+                  Anak
                 </div>
               </div>
             )}
@@ -405,7 +505,7 @@ export default function UsherDashboardPage() {
           <table className="w-full text-sm border-separate border-spacing-0">
             <thead>
               <tr className="bg-gray-100">
-                {["Event", "Tanggal", "Jemaat", "Tamu", "Total", "Status"].map((h) => (
+                {["Event", "Tanggal", "Jemaat", "Tamu", "Anak", "Total", "Status"].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-xs font-semibold text-black text-left border-b border-gray-100"
@@ -419,7 +519,7 @@ export default function UsherDashboardPage() {
               {loading ? (
                 Array.from({ length: 4 }).map((_, k) => (
                   <tr key={k} className="border-b border-gray-50">
-                    {[1, 2, 3, 4, 5, 6].map((c) => (
+                    {[1, 2, 3, 4, 5, 6, 7].map((c) => (
                       <td key={c} className="px-4 py-3">
                         <Skeleton className="h-4" />
                       </td>
@@ -428,7 +528,7 @@ export default function UsherDashboardPage() {
                 ))
               ) : recentReports.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-sm text-gray-400">
+                  <td colSpan={7} className="py-12 text-center text-sm text-gray-400">
                     Belum ada laporan yang dikirim.{" "}
                     <Link href="/usher/attendance" className="text-blue-600 underline underline-offset-2">
                       Buat laporan pertama
@@ -437,7 +537,7 @@ export default function UsherDashboardPage() {
                 </tr>
               ) : (
                 recentReports.map((r) => {
-                  const total = r.total_members + r.total_visitors;
+                  const total = r.total_members + r.total_visitors + r.total_kids;
                   return (
                     <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap max-w-[12rem] truncate">
@@ -453,6 +553,9 @@ export default function UsherDashboardPage() {
                       </td>
                       <td className="px-4 py-3 text-gray-700 tabular-nums">
                         {r.total_visitors.toLocaleString("id-ID")}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700 tabular-nums">
+                        {r.total_kids.toLocaleString("id-ID")}
                       </td>
                       <td className="px-4 py-3 font-semibold text-gray-900 tabular-nums">
                         {total.toLocaleString("id-ID")}

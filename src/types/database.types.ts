@@ -26,6 +26,7 @@ export type Database = {
           submitted_by: string
           total_members: number
           total_visitors: number
+          total_kids: number
         }
         Insert: {
           by_congregation?: Json | null
@@ -37,6 +38,7 @@ export type Database = {
           submitted_by: string
           total_members?: number
           total_visitors?: number
+          total_kids?: number
         }
         Update: {
           by_congregation?: Json | null
@@ -48,6 +50,7 @@ export type Database = {
           submitted_by?: string
           total_members?: number
           total_visitors?: number
+          total_kids?: number
         }
         Relationships: [
           {

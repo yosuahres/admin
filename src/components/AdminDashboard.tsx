@@ -2,6 +2,7 @@
 "use client";
 import {
   Award,
+  Baby,
   Cake,
   CalendarDays,
   ChevronDown,
@@ -10,6 +11,8 @@ import {
   PartyPopper,
   TrendingDown,
   TrendingUp,
+  UserCheck,
+  UserPlus,
   Users,
   Wallet,
 } from "lucide-react";
@@ -90,6 +93,18 @@ interface GroupRow {
 
 interface MemberRow {
   icare_id: string | null;
+}
+
+interface AttendanceRow {
+  id: string;
+  submitted_at: string | null;
+  total_members: number;
+  total_visitors: number;
+  total_kids: number;
+  event_occurrences: {
+    occurrence_date: string | null;
+    events: { event_name: string; event_type: string | null } | null;
+  } | null;
 }
 
 // ---- Birthday helpers ----
@@ -313,6 +328,27 @@ async function fetchDashboardData() {
   };
 }
 
+async function fetchAttendanceData() {
+  // All ushers' reports (admin-wide), newest first
+  const { data } = await supabase
+    .from("attendance_reports")
+    .select(
+      "id, submitted_at, total_members, total_visitors, total_kids, event_occurrences!inner(occurrence_date, events!inner(event_name, event_type))"
+    )
+    .order("submitted_at", { ascending: false })
+    .limit(1000);
+  return (data ?? []) as unknown as AttendanceRow[];
+}
+
+// Chart label for a worship date (e.g. "Min, 5 Jul")
+function fmtOccLabel(iso: string) {
+  return new Date(iso).toLocaleDateString("id-ID", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+}
+
 // ---- Sub-components ----
 function BirthdayCard({ person }: { person: BirthdayPerson }) {
   const isToday = person.daysUntil === 0;
@@ -458,6 +494,12 @@ export default function AdminDashboard() {
   const { data: finData, isLoading: finLoading } = useSWR(
     "admin-finance",
     fetchFinanceData,
+    { revalidateOnFocus: false, dedupingInterval: 300_000 },
+  );
+
+  const { data: attData, isLoading: attLoading } = useSWR(
+    "admin-attendance",
+    fetchAttendanceData,
     { revalidateOnFocus: false, dedupingInterval: 300_000 },
   );
 
@@ -713,6 +755,50 @@ export default function AdminDashboard() {
     if (!cutoff) return finMonthlyChart;
     return finMonthlyChart.filter((m) => m.rawMonth && new Date(m.rawMonth) >= cutoff);
   }, [filterRange, finMonthlyChart, customFrom, customTo]);
+
+  // Attendance (Kehadiran Ibadah) — respects the global date filter via occurrence_date
+  const attFiltered = useMemo(() => {
+    const inRange = (dateStr?: string | null) => {
+      if (!dateStr) return false;
+      const ds = dateStr.slice(0, 10);
+      if (filterRange === "all") return true;
+      if (filterRange === "custom") {
+        if (!customFrom) return true;
+        return ds >= customFrom && (!customTo || ds <= customTo);
+      }
+      const cutoff = getRangeCutoff(filterRange);
+      if (!cutoff) return true;
+      return new Date(ds) >= cutoff;
+    };
+    return (attData ?? []).filter((r) => inRange(r.event_occurrences?.occurrence_date));
+  }, [attData, filterRange, customFrom, customTo]);
+
+  const attKpis = useMemo(() => {
+    const totalReports = attFiltered.length;
+    const totalMembers = attFiltered.reduce((s, r) => s + (r.total_members ?? 0), 0);
+    const totalVisitors = attFiltered.reduce((s, r) => s + (r.total_visitors ?? 0), 0);
+    const totalKids = attFiltered.reduce((s, r) => s + (r.total_kids ?? 0), 0);
+    const avgTotal = totalReports > 0
+      ? Math.round((totalMembers + totalVisitors + totalKids) / totalReports)
+      : 0;
+    return { totalReports, totalMembers, totalVisitors, totalKids, avgTotal };
+  }, [attFiltered]);
+
+  const attTrend = useMemo(
+    () =>
+      [...attFiltered]
+        .slice(0, 10) // latest 10 (attFiltered is submitted_at desc)
+        .reverse()
+        .map((r) => ({
+          label: r.event_occurrences?.occurrence_date
+            ? fmtOccLabel(r.event_occurrences.occurrence_date)
+            : "—",
+          jemaat: r.total_members,
+          tamu: r.total_visitors,
+          anak: r.total_kids,
+        })),
+    [attFiltered],
+  );
 
   const rangeLabel =
     filterRange === "all" ? "All time"
@@ -1108,6 +1194,103 @@ export default function AdminDashboard() {
                 <Bar dataKey="jumlah" fill="#8B5CF6" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
+          )}
+        </ChartCard>
+      </div>
+
+      {/* Attendance / Kehadiran Ibadah */}
+      <div>
+        <h2 className="text-base font-bold text-gray-800 mb-3">Kehadiran Ibadah</h2>
+
+        {/* Attendance KPI cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <KpiCard
+            icon={TrendingUp}
+            label="Rata-rata Hadir"
+            value={attLoading ? null : attKpis.avgTotal.toLocaleString("id-ID")}
+            sub="orang per event"
+            iconBg="bg-violet-500"
+          />
+          <KpiCard
+            icon={UserCheck}
+            label="Total Jemaat"
+            value={attLoading ? null : attKpis.totalMembers.toLocaleString("id-ID")}
+            sub="member hadir"
+            iconBg="bg-emerald-500"
+          />
+          <KpiCard
+            icon={UserPlus}
+            label="Total Tamu"
+            value={attLoading ? null : attKpis.totalVisitors.toLocaleString("id-ID")}
+            sub="pengunjung hadir"
+            iconBg="bg-orange-500"
+          />
+          <KpiCard
+            icon={Baby}
+            label="Total Anak"
+            value={attLoading ? null : attKpis.totalKids.toLocaleString("id-ID")}
+            sub="anak hadir"
+            iconBg="bg-teal-500"
+          />
+        </div>
+
+        {/* Trend chart */}
+        <ChartCard title="Tren Kehadiran (10 Laporan Terakhir)">
+          {attLoading ? (
+            <ChartSkeleton />
+          ) : attTrend.length === 0 ? (
+            <EmptyChart message="Belum ada laporan kehadiran" />
+          ) : (
+            <>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart
+                  data={attTrend}
+                  margin={{ top: 4, right: 8, left: -16, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "8px",
+                      border: "1px solid #E5E7EB",
+                      fontSize: 12,
+                    }}
+                    formatter={(val, name) => [
+                      `${val} orang`,
+                      name === "jemaat" ? "Jemaat" : name === "tamu" ? "Tamu" : "Anak",
+                    ]}
+                  />
+                  <Bar dataKey="jemaat" stackId="a" fill="#3B82F6" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="tamu" stackId="a" fill="#A78BFA" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="anak" stackId="a" fill="#34D399" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="flex items-center gap-4 mt-2">
+                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-blue-500 shrink-0" />
+                  Jemaat
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-violet-400 shrink-0" />
+                  Tamu
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400 shrink-0" />
+                  Anak
+                </div>
+              </div>
+            </>
           )}
         </ChartCard>
       </div>

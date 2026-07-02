@@ -11,6 +11,7 @@ type Report = {
   submitted_at: string;
   total_members: number;
   total_visitors: number;
+  total_kids: number;
   is_official: boolean;
   notes: string | null;
   event_occurrences: {
@@ -25,6 +26,7 @@ const EMPTY_FORM = {
   occurrence_id: "",
   total_members: "",
   total_visitors: "",
+  total_kids: "",
   notes: "",
 };
 
@@ -222,11 +224,12 @@ function AddReportModal({
           </div>
 
           {/* Counts */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {(
               [
-                { key: "total_members", label: "Jemaat (member)" },
-                { key: "total_visitors", label: "Pengunjung (tamu)" },
+                { key: "total_members", label: "Jemaat dewasa" },
+                { key: "total_visitors", label: "Tamu dewasa" },
+                { key: "total_kids", label: "Anak (kids)" },
               ] as const
             ).map(({ key, label }) => (
               <div key={key} className="space-y-1.5">
@@ -315,7 +318,7 @@ export default function UsherAttendancePage() {
     const { data } = await supabase
       .from("attendance_reports")
       .select(
-        "id, submitted_at, total_members, total_visitors, is_official, notes, event_occurrences(occurrence_date, events(event_name))"
+        "id, submitted_at, total_members, total_visitors, total_kids, is_official, notes, event_occurrences(occurrence_date, events(event_name))"
       )
       .eq("submitted_by", user.id)
       .order("submitted_at", { ascending: false })
@@ -353,6 +356,7 @@ export default function UsherAttendancePage() {
       submitted_by: user.id,
       total_members: parseInt(form.total_members || "0"),
       total_visitors: parseInt(form.total_visitors || "0"),
+      total_kids: parseInt(form.total_kids || "0"),
       notes: form.notes || null,
     });
 
@@ -407,7 +411,7 @@ export default function UsherAttendancePage() {
             <table className="table-fixed min-w-[700px] w-full border-separate border-spacing-0">
               <thead>
                 <tr className="bg-gray-100">
-                  {["Event", "Tanggal", "Jemaat", "Tamu", "Total", "Status", "Catatan"].map((h) => (
+                  {["Event", "Tanggal", "Jemaat", "Tamu", "Anak", "Total", "Status", "Catatan"].map((h) => (
                     <th
                       key={h}
                       className="w-40 border-b border-gray-100 px-4 py-3 text-left text-xs font-semibold text-black bg-gray-100"
@@ -420,19 +424,19 @@ export default function UsherAttendancePage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="py-20 text-center">
+                    <td colSpan={8} className="py-20 text-center">
                       <div className="w-5 h-5 border-2 border-gray-200 border-t-gray-500 rounded-full animate-spin mx-auto" />
                     </td>
                   </tr>
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-20 text-center text-sm text-gray-400">
+                    <td colSpan={8} className="py-20 text-center text-sm text-gray-400">
                       {search ? `Tidak ada hasil untuk "${search}"` : "Belum ada laporan."}
                     </td>
                   </tr>
                 ) : (
                   filtered.map((report) => {
-                    const total = report.total_members + report.total_visitors;
+                    const total = report.total_members + report.total_visitors + report.total_kids;
                     return (
                       <tr key={report.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                         <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap truncate max-w-[12rem]">
@@ -448,6 +452,9 @@ export default function UsherAttendancePage() {
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-700 tabular-nums">
                           {report.total_visitors.toLocaleString("id-ID")}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700 tabular-nums">
+                          {report.total_kids.toLocaleString("id-ID")}
                         </td>
                         <td className="px-4 py-3 text-sm font-semibold text-gray-900 tabular-nums">
                           {total.toLocaleString("id-ID")}

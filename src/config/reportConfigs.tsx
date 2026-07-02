@@ -286,6 +286,7 @@ export const REPORT_CONFIGS: ReportConfig[] = [
       id,
       total_members,
       total_visitors,
+      total_kids,
       notes,
       submitted_at,
       event_occurrences!inner(
@@ -322,12 +323,17 @@ export const REPORT_CONFIGS: ReportConfig[] = [
         label: "Jumlah Tamu",
         type: "number_range",
       },
+      {
+        key: "total_kids",
+        label: "Jumlah Anak",
+        type: "number_range",
+      },
     ],
     transformForExport: (rows: any[]) =>
       rows.map((row) => {
         const occ   = row.event_occurrences ?? {};
         const ev    = occ.events ?? {};
-        const total = (row.total_members ?? 0) + (row.total_visitors ?? 0);
+        const total = (row.total_members ?? 0) + (row.total_visitors ?? 0) + (row.total_kids ?? 0);
         return {
           "Nama Event":      ev.event_name  ?? "-",
           "Tipe Event":      ev.event_type  ?? "-",
@@ -341,6 +347,7 @@ export const REPORT_CONFIGS: ReportConfig[] = [
           "Jam Selesai":     occ.end_time   ? occ.end_time.slice(0, 5)   : "-",
           "Jemaat (member)": row.total_members  ?? 0,
           "Tamu (visitor)":  row.total_visitors ?? 0,
+          "Anak (kids)":     row.total_kids     ?? 0,
           "Total Hadir":     total,
           "Catatan":         row.notes ?? "-",
           "Dilaporkan Pada": row.submitted_at
@@ -408,10 +415,19 @@ export const REPORT_CONFIGS: ReportConfig[] = [
         ),
       },
       {
+        key: "total_kids",
+        label: "Anak",
+        editable: true,
+        inputType: "number",
+        render: (v) => (
+          <span className="font-semibold tabular-nums text-gray-700">{v ?? 0}</span>
+        ),
+      },
+      {
         key: "total_hadir",
         label: "Total",
         render: (_, row) => {
-          const total = (row.total_members ?? 0) + (row.total_visitors ?? 0);
+          const total = (row.total_members ?? 0) + (row.total_visitors ?? 0) + (row.total_kids ?? 0);
           return (
             <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-900 text-white tabular-nums">
               {total}

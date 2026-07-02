@@ -9,6 +9,7 @@ type PastReport = {
   submitted_at: string;
   total_members: number;
   total_visitors: number;
+  total_kids: number;
   is_official: boolean;
   notes: string | null;
   event_occurrences: {
@@ -44,7 +45,7 @@ export default function UsherAttendanceHistoryPage() {
       const { data } = await supabase
         .from("attendance_reports")
         .select(
-          `id, submitted_at, total_members, total_visitors, is_official, notes,
+          `id, submitted_at, total_members, total_visitors, total_kids, is_official, notes,
            event_occurrences(occurrence_date, events(event_name))`
         )
         .eq("submitted_by", user.id)
@@ -82,7 +83,7 @@ export default function UsherAttendanceHistoryPage() {
       ) : (
         <div className="space-y-2">
           {history.map((report) => {
-            const total = report.total_members + report.total_visitors;
+            const total = report.total_members + report.total_visitors + report.total_kids;
 
             return (
               <Card key={report.id} className="p-4">
@@ -128,6 +129,12 @@ export default function UsherAttendanceHistoryPage() {
                       {report.total_visitors.toLocaleString("id-ID")}
                     </span>{" "}
                     tamu
+                  </span>
+                  <span>
+                    <span className="font-medium text-gray-700">
+                      {report.total_kids.toLocaleString("id-ID")}
+                    </span>{" "}
+                    anak
                   </span>
                 </div>
 
