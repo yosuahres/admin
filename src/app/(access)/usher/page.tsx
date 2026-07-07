@@ -185,16 +185,14 @@ export default function UsherDashboardPage() {
     setUpcomingLoading(true);
     const now = new Date();
     const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    const nextWeek = new Date(today);
-    nextWeek.setUTCDate(nextWeek.getUTCDate() + 7);
 
     const { data } = await supabase
       .from("event_occurrences")
       .select("id, occurrence_date, start_time, events(event_name, event_type)")
       .eq("is_cancelled", false)
       .gte("occurrence_date", today.toISOString().split("T")[0])
-      .lte("occurrence_date", nextWeek.toISOString().split("T")[0])
-      .order("occurrence_date", { ascending: true });
+      .order("occurrence_date", { ascending: true })
+      .limit(200);
 
     setUpcoming((data as any) ?? []);
     setUpcomingLoading(false);
@@ -266,12 +264,16 @@ export default function UsherDashboardPage() {
     [reports]
   );
 
-  // Last 10 reports for trend chart (chronological order)
+  // Last 10 reports for trend chart, ordered chronologically by event (worship) date
   const trendData = useMemo(
     () =>
       [...reports]
         .slice(0, 10)
-        .reverse()
+        .sort((a, b) => {
+          const da = a.event_occurrences?.occurrence_date ?? "";
+          const db = b.event_occurrences?.occurrence_date ?? "";
+          return da.localeCompare(db);
+        })
         .map((r) => ({
           label: r.event_occurrences?.occurrence_date
             ? fmtDate(r.event_occurrences.occurrence_date)
@@ -362,7 +364,7 @@ export default function UsherDashboardPage() {
 
         {/* Upcoming events */}
         <SectionCard
-          title="Event Minggu Ini"
+          title="Event Mendatang"
           className="lg:col-span-2"
           action={
             <Link
@@ -373,14 +375,14 @@ export default function UsherDashboardPage() {
             </Link>
           }
         >
-          <div className="p-4 space-y-2">
+          <div className="p-4 space-y-2 max-h-[420px] overflow-y-auto">
             {upcomingLoading ? (
               [1, 2, 3].map((k) => <Skeleton key={k} className="h-14" />)
             ) : upcoming.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-8 text-center">
                 <CalendarDays size={28} className="text-gray-200" />
                 <p className="text-sm text-gray-400">
-                  Tidak ada event minggu ini
+                  Tidak ada event mendatang
                 </p>
               </div>
             ) : (
