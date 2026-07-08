@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   CalendarDays, ChevronDown, ChevronLeft, ChevronRight,
-  TrendingUp, TrendingDown, Wallet, Loader2, Check,
+  TrendingUp, TrendingDown, Wallet,
 } from "lucide-react";
 import { supabase } from "@/utils/api";
+import { useSetPageActions } from "@/contexts/page-actions";
 import type { Database } from "@/types/database.types";
 
 /* ── Types ─────────────────────────────────────────────────────────── */
@@ -32,14 +34,6 @@ function displayRupiah(n: number) {
   const abs = Math.abs(n);
   return (n < 0 ? "-" : "") + "Rp " + new Intl.NumberFormat("id-ID").format(abs);
 }
-function formatRupiahInput(value: string) {
-  const num = value.replace(/\D/g, "");
-  if (!num) return "";
-  return new Intl.NumberFormat("id-ID").format(Number(num));
-}
-function parseRupiah(value: string) {
-  return Number(value.replace(/\D/g, "")) || 0;
-}
 
 const MONTHS_ID = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -59,6 +53,7 @@ function periodRange(periodType: PeriodType, year: number, month: number) {
 /* ── Page ──────────────────────────────────────────────────────────── */
 
 export default function BudgetPage() {
+  const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -73,10 +68,16 @@ export default function BudgetPage() {
   const [budgets, setBudgets] = useState<BudgetRow[]>([]);
   const [actuals, setActuals] = useState<Record<string, number>>({});
 
-  // Inline edit state: category_id -> formatted rupiah string being typed
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const [savingId, setSavingId] = useState<string | null>(null);
-  const [savedId, setSavedId] = useState<string | null>(null);
+  // Register the header "Tambah Anggaran" button → batch add form (carrying the current period)
+  const periodRefState = useRef({ periodType, year, month });
+  periodRefState.current = { periodType, year, month };
+  useSetPageActions({
+    addLabel: "Tambah Anggaran",
+    onAdd: () => {
+      const p = periodRefState.current;
+      router.push(`/finance/budget/add?type=${p.periodType}&year=${p.year}&month=${p.month}`);
+    },
+  });
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -128,7 +129,6 @@ export default function BudgetPage() {
       actualMap[cid] = (actualMap[cid] ?? 0) + Number(t.amount ?? 0);
     }
     setActuals(actualMap);
-    setDrafts({});
     setLoading(false);
   }, [periodType, year, month]);
 
@@ -141,48 +141,6 @@ export default function BudgetPage() {
     for (const b of budgets) map[b.category_id] = b;
     return map;
   }, [budgets]);
-
-  async function saveBudget(categoryId: string) {
-    const raw = drafts[categoryId];
-    if (raw === undefined) return;
-    const amount = parseRupiah(raw);
-    setSavingId(categoryId);
-
-    const existing = budgetByCat[categoryId];
-    const payload = {
-      category_id: categoryId,
-      year,
-      month: periodType === "month" ? month : null,
-      planned_amount: amount,
-    };
-
-    const client = supabase.from("cashflow_budgets" as never) as any;
-    const { error } = existing
-      ? await client.update({ planned_amount: amount }).eq("id", existing.id)
-      : await client.insert(payload);
-
-    setSavingId(null);
-    if (error) {
-      console.error("Gagal menyimpan anggaran:", error.message);
-      return;
-    }
-
-    // Update local state without full refetch
-    setBudgets((prev) => {
-      const others = prev.filter((b) => b.category_id !== categoryId);
-      const updated: BudgetRow = existing
-        ? { ...existing, planned_amount: amount }
-        : { id: crypto.randomUUID(), ...payload, notes: null };
-      return [...others, updated];
-    });
-    setDrafts((prev) => {
-      const next = { ...prev };
-      delete next[categoryId];
-      return next;
-    });
-    setSavedId(categoryId);
-    setTimeout(() => setSavedId((v) => (v === categoryId ? null : v)), 1500);
-  }
 
   if (!authorized) return null;
 
@@ -332,11 +290,6 @@ export default function BudgetPage() {
         cats={incomeCats}
         budgetByCat={budgetByCat}
         actuals={actuals}
-        drafts={drafts}
-        setDrafts={setDrafts}
-        onSave={saveBudget}
-        savingId={savingId}
-        savedId={savedId}
         loading={loading}
       />
 
@@ -347,11 +300,6 @@ export default function BudgetPage() {
         cats={expenseCats}
         budgetByCat={budgetByCat}
         actuals={actuals}
-        drafts={drafts}
-        setDrafts={setDrafts}
-        onSave={saveBudget}
-        savingId={savingId}
-        savedId={savedId}
         loading={loading}
       />
     </div>
@@ -401,21 +349,16 @@ function SummaryCard({
   );
 }
 
-/* ── Budget section (one table) ────────────────────────────────────── */
+/* ── Budget section (one table, read-only) ─────────────────────────── */
 
 function BudgetSection({
-  title, kind, cats, budgetByCat, actuals, drafts, setDrafts, onSave, savingId, savedId, loading,
+  title, kind, cats, budgetByCat, actuals, loading,
 }: {
   title: string;
   kind: "income" | "expense";
   cats: Category[];
   budgetByCat: Record<string, { planned_amount: number }>;
   actuals: Record<string, number>;
-  drafts: Record<string, string>;
-  setDrafts: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  onSave: (categoryId: string) => void;
-  savingId: string | null;
-  savedId: string | null;
   loading: boolean;
 }) {
   const income = kind === "income";
@@ -462,34 +405,12 @@ function BudgetSection({
                 const diff = income ? actual - planned : planned - actual;
                 const pct = planned > 0 ? Math.round((actual / planned) * 100) : 0;
                 const over = !income && actual > planned && planned > 0;
-                const draft = drafts[cat.id];
-                const editing = draft !== undefined;
-                const saving = savingId === cat.id;
-                const saved = savedId === cat.id;
 
                 return (
                   <tr key={cat.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 font-medium text-gray-800">{cat.name}</td>
-                    <td className="px-4 py-2 text-right">
-                      <div className="relative inline-flex items-center">
-                        <span className="absolute left-2.5 text-xs text-gray-400 pointer-events-none select-none">Rp</span>
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          value={editing ? draft : (planned ? new Intl.NumberFormat("id-ID").format(planned) : "")}
-                          placeholder="0"
-                          onChange={(e) =>
-                            setDrafts((prev) => ({ ...prev, [cat.id]: formatRupiahInput(e.target.value) }))
-                          }
-                          onBlur={() => { if (editing) onSave(cat.id); }}
-                          onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-                          className="w-32 pl-8 pr-2 py-1.5 text-sm text-right border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400"
-                        />
-                        <span className="w-5 ml-1 shrink-0">
-                          {saving && <Loader2 size={13} className="animate-spin text-blue-500" />}
-                          {saved && !saving && <Check size={13} className="text-emerald-500" />}
-                        </span>
-                      </div>
+                    <td className="px-4 py-3 text-right font-semibold text-gray-800">
+                      {planned ? displayRupiah(planned) : <span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-4 py-3 text-right font-semibold text-gray-700">{displayRupiah(actual)}</td>
                     <td className={`px-4 py-3 text-right font-semibold ${

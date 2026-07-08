@@ -148,7 +148,7 @@ export default function CashflowAddPage() {
 
 /* ── Shared sub-components ───────────────────────────────────────── */
 
-function SimpleSelect({
+export function SimpleSelect({
   value,
   options,
   onChange,
@@ -223,7 +223,7 @@ function SimpleSelect({
   );
 }
 
-function CategorySelect({
+export function CategorySelect({
   value,
   options,
   onChange,
