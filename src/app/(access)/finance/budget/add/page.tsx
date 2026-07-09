@@ -14,6 +14,7 @@ type BudgetLine = {
   type: "income" | "expense";
   category: string;   // category_id
   amount: string;     // formatted rupiah
+  note: string;       // optional per-entry note
 };
 
 const MONTHS_ID = [
@@ -22,7 +23,7 @@ const MONTHS_ID = [
 ];
 
 function newLine(): BudgetLine {
-  return { id: Math.random().toString(36).slice(2), type: "income", category: "", amount: "" };
+  return { id: Math.random().toString(36).slice(2), type: "income", category: "", amount: "", note: "" };
 }
 function formatRupiah(value: string) {
   const num = value.replace(/\D/g, "");
@@ -98,42 +99,24 @@ function BudgetAddInner() {
       return;
     }
 
-    // Aggregate by category (sum if the same category appears twice)
-    const perCategory: Record<string, number> = {};
-    for (const i of valid) perCategory[i.category] = (perCategory[i.category] ?? 0) + parseRupiah(i.amount);
-
     const targetMonth = periodType === "month" ? month : null;
     setSaving(true);
 
-    // Find which categories already have a budget for this period → update; rest → insert
+    // Each line is appended as its own budget entry (ledger). The budget page
+    // sums all entries per category for the period's "Rencana" total.
     const client = supabase.from("cashflow_budgets" as never) as any;
-    let existingQuery = client.select("id, category_id").eq("year", year);
-    existingQuery = targetMonth == null ? existingQuery.is("month", null) : existingQuery.eq("month", targetMonth);
-    const { data: existingRows } = await existingQuery;
-    const existingByCat: Record<string, string> = {};
-    for (const r of (existingRows as { id: string; category_id: string }[]) ?? []) {
-      existingByCat[r.category_id] = r.id;
-    }
+    const inserts = valid.map((i) => ({
+      category_id: i.category,
+      year,
+      month: targetMonth,
+      planned_amount: parseRupiah(i.amount),
+      notes: i.note.trim() || null,
+    }));
 
-    const inserts: any[] = [];
-    const updates: Promise<any>[] = [];
-    for (const [categoryId, amount] of Object.entries(perCategory)) {
-      const existingId = existingByCat[categoryId];
-      if (existingId) {
-        updates.push(client.update({ planned_amount: amount }).eq("id", existingId));
-      } else {
-        inserts.push({ category_id: categoryId, year, month: targetMonth, planned_amount: amount });
-      }
-    }
-
-    const results = await Promise.all([
-      inserts.length ? client.insert(inserts) : Promise.resolve({ error: null }),
-      ...updates,
-    ]);
+    const { error: insertError } = await client.insert(inserts);
     setSaving(false);
 
-    const firstError = results.find((r: any) => r?.error)?.error;
-    if (firstError) { setError(firstError.message); return; }
+    if (insertError) { setError(insertError.message); return; }
 
     router.push(`/finance/budget?type=${periodType}&year=${year}&month=${month}`);
   }
@@ -202,7 +185,7 @@ function BudgetAddInner() {
           </div>
           <p className="text-xs text-gray-400 mt-3">
             Anggaran yang ditambahkan berlaku untuk <span className="font-medium text-gray-600">{periodLabel}</span>.
-            Kategori yang sudah punya anggaran di periode ini akan diperbarui.
+            Setiap baris dicatat sebagai entri baru — total &quot;Rencana&quot; kategori adalah jumlah dari semua entri.
           </p>
         </div>
 
@@ -261,6 +244,16 @@ function BudgetAddInner() {
                       />
                     </div>
                   </div>
+                  <div className="space-y-1">
+                    <label className="block text-xs font-medium text-gray-500">Catatan (opsional)</label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: tambahan dana misi"
+                      value={item.note}
+                      onChange={(e) => updateItem(item.id, "note", e.target.value)}
+                      className="w-full px-2.5 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400"
+                    />
+                  </div>
                 </div>
               );
             })}
@@ -276,9 +269,10 @@ function BudgetAddInner() {
             <table className="w-full text-sm border-separate border-spacing-0">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-black w-40">Tipe</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-black w-64">Kategori</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-black">Jumlah Anggaran</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-black w-36">Tipe</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-black w-56">Kategori</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-black w-44">Jumlah Anggaran</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-black">Catatan (opsional)</th>
                   <th className="px-4 py-3 w-10" />
                 </tr>
               </thead>
@@ -319,6 +313,15 @@ function BudgetAddInner() {
                           />
                         </div>
                       </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          placeholder="Contoh: tambahan dana misi"
+                          value={item.note}
+                          onChange={(e) => updateItem(item.id, "note", e.target.value)}
+                          className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400"
+                        />
+                      </td>
                       <td className="px-3 py-2 text-center">
                         <button
                           onClick={() => removeRow(item.id)}
@@ -332,7 +335,7 @@ function BudgetAddInner() {
                   );
                 })}
                 <tr>
-                  <td colSpan={4} className="px-4 py-2.5">
+                  <td colSpan={5} className="px-4 py-2.5">
                     <button onClick={addRow} className="flex items-center gap-1.5 text-sm text-gray-700 hover:text-gray-900 font-medium transition-colors">
                       <Plus size={14} /> Tambah Baris
                     </button>
