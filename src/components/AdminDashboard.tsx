@@ -787,7 +787,14 @@ export default function AdminDashboard() {
   const attTrend = useMemo(
     () =>
       [...attFiltered]
-        .slice(0, 10) // latest 10 (attFiltered is submitted_at desc)
+        // sort by worship (occurrence) date so the 10 most recent events are picked…
+        .sort((a, b) =>
+          (b.event_occurrences?.occurrence_date ?? "").localeCompare(
+            a.event_occurrences?.occurrence_date ?? "",
+          ),
+        )
+        .slice(0, 10)
+        // …then display oldest → newest along the X axis
         .reverse()
         .map((r) => ({
           label: r.event_occurrences?.occurrence_date

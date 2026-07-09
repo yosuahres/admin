@@ -268,12 +268,15 @@ export default function UsherDashboardPage() {
   const trendData = useMemo(
     () =>
       [...reports]
-        .slice(0, 10)
+        // pick the 10 most recent events by worship (occurrence) date…
         .sort((a, b) => {
           const da = a.event_occurrences?.occurrence_date ?? "";
           const db = b.event_occurrences?.occurrence_date ?? "";
-          return da.localeCompare(db);
+          return db.localeCompare(da);
         })
+        .slice(0, 10)
+        // …then display oldest → newest along the X axis
+        .reverse()
         .map((r) => ({
           label: r.event_occurrences?.occurrence_date
             ? fmtDate(r.event_occurrences.occurrence_date)
