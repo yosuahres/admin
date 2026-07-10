@@ -107,8 +107,7 @@ export default function PerpuluhanPage() {
         .order(sortKey, { ascending: sortDir === "asc" });
 
       if (methodFilter !== "all") q = q.eq("payment_method", methodFilter);
-      if (search)
-        q = q.or(`giver_name.ilike.%${search}%,family_name.ilike.%${search}%`);
+      if (search) q = q.ilike("giver_name", `%${search}%`);
       if (dateFrom) q = q.gte("transaction_date", dateFrom);
       if (dateTo) q = q.lte("transaction_date", dateTo);
       return q;
@@ -140,8 +139,7 @@ export default function PerpuluhanPage() {
     const header = [
       "No",
       "Tanggal",
-      "Nama Pemberi",
-      "Keluarga",
+      "Nama",
       "Periode",
       "Metode",
       "Jumlah",
@@ -150,7 +148,6 @@ export default function PerpuluhanPage() {
       i + 1,
       fmtDate(t.transaction_date),
       t.giver_name,
-      t.family_name ?? "",
       periodeText(t.period_month, t.period_year),
       METHOD_LABEL[t.payment_method] ?? t.payment_method,
       Number(t.amount ?? 0),
@@ -473,10 +470,7 @@ export default function PerpuluhanPage() {
                   Tanggal
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold text-black text-left">
-                  Nama Pemberi
-                </th>
-                <th className="px-4 py-3 text-xs font-semibold text-black text-left">
-                  Keluarga
+                  Nama
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold text-black text-left">
                   Periode
@@ -494,7 +488,7 @@ export default function PerpuluhanPage() {
               {loading ? (
                 Array.from({ length: 6 }).map((_, k) => (
                   <tr key={k} className="border-b border-gray-50">
-                    {[1, 2, 3, 4, 5, 6, 7].map((c) => (
+                    {[1, 2, 3, 4, 5, 6].map((c) => (
                       <td key={c} className="px-4 py-3">
                         <div className="h-4 bg-gray-100 rounded animate-pulse" />
                       </td>
@@ -504,7 +498,7 @@ export default function PerpuluhanPage() {
               ) : rows.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={6}
                     className="text-center py-12 text-gray-400 text-sm"
                   >
                     Belum ada catatan perpuluhan.
@@ -521,13 +515,6 @@ export default function PerpuluhanPage() {
                     </td>
                     <td className="px-4 py-3 text-sm font-medium text-gray-800">
                       {t.giver_name}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-500">
-                      {t.family_name ? (
-                        t.family_name
-                      ) : (
-                        <span className="text-gray-300">—</span>
-                      )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
                       {periodeText(t.period_month, t.period_year)}

@@ -44,7 +44,6 @@ function parseRupiah(value: string) {
 interface FormState {
   giver_name: string;
   jemaat_id: string;
-  family_name: string;
   payment_method: string;
   amount: string;
   transaction_date: string;
@@ -60,7 +59,6 @@ export default function PerpuluhanAddPage() {
   const [form, setForm] = useState<FormState>({
     giver_name: "",
     jemaat_id: "",
-    family_name: "",
     payment_method: "tunai",
     amount: "",
     transaction_date: now.toISOString().split("T")[0],
@@ -141,7 +139,6 @@ export default function PerpuluhanAddPage() {
     const payload: TitheInsert = {
       amount,
       giver_name: form.giver_name.trim(),
-      family_name: form.family_name.trim() || null,
       jemaat_id: form.jemaat_id || null,
       payment_method: form.payment_method,
       transaction_date: form.transaction_date,
@@ -188,7 +185,7 @@ export default function PerpuluhanAddPage() {
             {/* Nama Pemberi */}
             <div className="space-y-1.5 sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
-                Nama Pemberi <span className="text-red-500">*</span>
+                Nama <span className="text-red-500">*</span>
               </label>
               <div ref={dropdownRef} className="relative">
                 <input
@@ -225,22 +222,6 @@ export default function PerpuluhanAddPage() {
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* Keluarga */}
-            <div className="space-y-1.5 sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Keluarga <span className="text-gray-400">(opsional)</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Nama keluarga / kepala keluarga..."
-                value={form.family_name}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, family_name: e.target.value }))
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
             </div>
 
             {/* Jumlah */}

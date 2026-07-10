@@ -22,7 +22,6 @@ create table if not exists public.tithes (
   transaction_date        date not null default current_date,
   amount                  numeric not null check (amount > 0),
   giver_name              text not null,                       -- nama pemberi (member or not)
-  family_name             text,                                -- keluarga / kepala keluarga
   jemaat_id               uuid references public.jemaat(id) on delete set null, -- optional member link
   payment_method          text not null default 'tunai',       -- tunai | transfer | qris
   period_month            int check (period_month between 1 and 12), -- bulan perpuluhan
@@ -62,12 +61,7 @@ begin
   where lower(name) = 'perpuluhan' and type = 'in'
   limit 1;
 
-  desc_text := 'Perpuluhan - ' || coalesce(nullif(trim(new.giver_name), ''), 'Anonim')
-    || case
-         when coalesce(trim(new.family_name), '') <> ''
-         then ' (Kel. ' || trim(new.family_name) || ')'
-         else ''
-       end;
+  desc_text := 'Perpuluhan - ' || coalesce(nullif(trim(new.giver_name), ''), 'Anonim');
 
   if (tg_op = 'INSERT') then
     insert into public.cashflow_transactions (transaction_date, type, category_id, description, amount)

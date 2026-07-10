@@ -607,7 +607,6 @@ export type Database = {
           amount: number
           cashflow_transaction_id: string | null
           created_at: string
-          family_name: string | null
           giver_name: string
           id: string
           jemaat_id: string | null
@@ -621,7 +620,6 @@ export type Database = {
           amount: number
           cashflow_transaction_id?: string | null
           created_at?: string
-          family_name?: string | null
           giver_name: string
           id?: string
           jemaat_id?: string | null
@@ -635,7 +633,6 @@ export type Database = {
           amount?: number
           cashflow_transaction_id?: string | null
           created_at?: string
-          family_name?: string | null
           giver_name?: string
           id?: string
           jemaat_id?: string | null
