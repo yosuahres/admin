@@ -14,7 +14,8 @@ interface HeaderProps {
 
 const extraLabels: Record<string, string> = {
   "/finance/reporting": "Laporan Keuangan",
-  "/finance/persembahan": "Persembahan",
+  "/finance/perpuluhan": "Perpuluhan",
+  "/finance/perpuluhan/add": "Input Perpuluhan",
   "/setting/account": "Account",
 };
 

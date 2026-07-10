@@ -10,6 +10,7 @@ import {
   Group,
   LayoutDashboard,
   Settings,
+  Sprout,
   Target,
   Users,
 } from "lucide-react";
@@ -59,6 +60,7 @@ export const financeNav: NavItem[] = [
   //   ],
   // },
   { href: "/finance/cashflow", label: "Cashflow", icon: ArrowLeftRight },
+  { href: "/finance/perpuluhan", label: "Perpuluhan", icon: Sprout },
   { href: "/finance/budget", label: "Anggaran", icon: Target },
   { href: "/finance/laporan", label: "Laporan Keuangan", icon: FileText },
   { href: "/finance/reporting", label: "Reporting", icon: BarChart2 },

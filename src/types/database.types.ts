@@ -602,6 +602,66 @@ export type Database = {
           },
         ]
       }
+      tithes: {
+        Row: {
+          amount: number
+          cashflow_transaction_id: string | null
+          created_at: string
+          family_name: string | null
+          giver_name: string
+          id: string
+          jemaat_id: string | null
+          notes: string | null
+          payment_method: string
+          period_month: number | null
+          period_year: number | null
+          transaction_date: string
+        }
+        Insert: {
+          amount: number
+          cashflow_transaction_id?: string | null
+          created_at?: string
+          family_name?: string | null
+          giver_name: string
+          id?: string
+          jemaat_id?: string | null
+          notes?: string | null
+          payment_method?: string
+          period_month?: number | null
+          period_year?: number | null
+          transaction_date?: string
+        }
+        Update: {
+          amount?: number
+          cashflow_transaction_id?: string | null
+          created_at?: string
+          family_name?: string | null
+          giver_name?: string
+          id?: string
+          jemaat_id?: string | null
+          notes?: string | null
+          payment_method?: string
+          period_month?: number | null
+          period_year?: number | null
+          transaction_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tithes_jemaat_id_fkey"
+            columns: ["jemaat_id"]
+            isOneToOne: false
+            referencedRelation: "jemaat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tithes_cashflow_transaction_id_fkey"
+            columns: ["cashflow_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "cashflow_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           email: string | null
