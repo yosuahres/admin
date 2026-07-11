@@ -60,7 +60,7 @@ export const financeNav: NavItem[] = [
   //   ],
   // },
   { href: "/finance/cashflow", label: "Cashflow", icon: ArrowLeftRight },
-  { href: "/finance/perpuluhan", label: "Perpuluhan", icon: Sprout },
+  // { href: "/finance/perpuluhan", label: "Perpuluhan", icon: Sprout }, // hidden for now
   { href: "/finance/budget", label: "Anggaran", icon: Target },
   { href: "/finance/laporan", label: "Laporan Keuangan", icon: FileText },
   { href: "/finance/reporting", label: "Reporting", icon: BarChart2 },

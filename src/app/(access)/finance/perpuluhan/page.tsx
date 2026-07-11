@@ -257,12 +257,7 @@ export default function PerpuluhanPage() {
   });
 
   async function handleDelete(id: string) {
-    if (
-      !window.confirm(
-        "Hapus catatan perpuluhan ini? Pemasukan terkait juga akan dihapus.",
-      )
-    )
-      return;
+    if (!window.confirm("Hapus catatan perpuluhan ini?")) return;
     setDeletingId(id);
     const { error } = await supabase.from("tithes").delete().eq("id", id);
     setDeletingId(null);

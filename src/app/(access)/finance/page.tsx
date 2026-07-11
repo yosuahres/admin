@@ -13,6 +13,7 @@ import type { Database } from "@/types/database.types";
 
 type MonthlySummaryRow = Database["public"]["Views"]["cashflow_monthly_summary"]["Row"];
 type TxViewRow = Database["public"]["Views"]["cashflow_transactions_view"]["Row"];
+// type TitheRow = Pick<Database["public"]["Tables"]["tithes"]["Row"], "amount" | "transaction_date">; // perpuluhan hidden for now
 
 const MONTH_ID = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
 
@@ -209,6 +210,7 @@ export default function FinanceDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [allMonthly, setAllMonthly] = useState<MonthlySummaryRow[]>([]);
   const [catData, setCatData] = useState<Pick<TxViewRow, "type" | "category_name" | "amount" | "transaction_date">[]>([]);
+  // const [titheData, setTitheData] = useState<TitheRow[]>([]); // perpuluhan hidden for now
   const [recentTx, setRecentTx] = useState<TxViewRow[]>([]);
   const [rangeOpen, setRangeOpen] = useState(false);
   const [filterRange, setFilterRange] = useState<RangeOption>("all");
@@ -251,6 +253,10 @@ export default function FinanceDashboardPage() {
       supabase
         .from("cashflow_transactions_view")
         .select("type, category_name, amount, transaction_date"),
+      // perpuluhan hidden for now
+      // supabase
+      //   .from("tithes")
+      //   .select("amount, transaction_date"),
       supabase
         .from("cashflow_transactions_view")
         .select("*")
@@ -260,6 +266,7 @@ export default function FinanceDashboardPage() {
 
     if (monthly) setAllMonthly(monthly);
     if (cats) setCatData(cats);
+    // if (tithes) setTitheData(tithes); // perpuluhan hidden for now
     if (recent) setRecentTx(recent);
     setLoading(false);
   }
@@ -341,6 +348,41 @@ export default function FinanceDashboardPage() {
 
   const incomeCatTotal = incomeByCategory.reduce((s, d) => s + d.value, 0);
   const expenseCatTotal = expenseByCategory.reduce((s, d) => s + d.value, 0);
+
+  // Perpuluhan — hidden for now (tracked separately from cashflow income)
+  // const filteredTithes = useMemo(() => {
+  //   if (filterRange === "all") return titheData;
+  //   if (filterRange === "custom") {
+  //     if (!customFrom) return titheData;
+  //     return titheData.filter((t) => {
+  //       const d = t.transaction_date?.slice(0, 10) ?? "";
+  //       return d >= customFrom && (!customTo || d <= customTo);
+  //     });
+  //   }
+  //   const months = filterRange === "3m" ? 3 : filterRange === "6m" ? 6 : 12;
+  //   const now = new Date();
+  //   const cutoff = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
+  //   return titheData.filter((t) => t.transaction_date && new Date(t.transaction_date) >= cutoff);
+  // }, [filterRange, titheData, customFrom, customTo]);
+
+  // const titheChartData = useMemo(() => {
+  //   const map: Record<string, number> = {};
+  //   for (const t of filteredTithes) {
+  //     if (!t.transaction_date) continue;
+  //     const d = new Date(t.transaction_date);
+  //     const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-01`;
+  //     map[key] = (map[key] ?? 0) + Number(t.amount ?? 0);
+  //   }
+  //   return Object.entries(map)
+  //     .sort(([a], [b]) => (a < b ? -1 : 1))
+  //     .map(([rawMonth, perpuluhan]) => ({
+  //       month: formatMonthDate(rawMonth),
+  //       perpuluhan,
+  //       rawMonth,
+  //     }));
+  // }, [filteredTithes]);
+
+  // const titheTotal = filteredTithes.reduce((s, t) => s + Number(t.amount ?? 0), 0);
 
   if (!authorized) return null;
 
@@ -579,6 +621,49 @@ export default function FinanceDashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Perpuluhan trend — hidden for now
+      <div className="bg-white border border-gray-200 rounded-xl p-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm font-semibold text-gray-800">Tren Perpuluhan</p>
+            <p className="text-xs text-gray-400 mt-0.5">Terpisah dari pemasukan kas</p>
+          </div>
+          <div className="text-right">
+            <p className="text-base font-bold text-violet-700">{displayRupiah(titheTotal)}</p>
+            <p className="text-xs text-gray-400 mt-0.5">Total perpuluhan</p>
+          </div>
+        </div>
+        {loading ? (
+          <ChartSkeleton />
+        ) : titheChartData.length === 0 ? (
+          <div className="flex items-center justify-center h-44 text-gray-400 text-sm">Belum ada data</div>
+        ) : (
+          <ResponsiveContainer width="100%" height={200}>
+            <ComposedChart data={titheChartData} margin={{ top: 12, right: 8, left: -8, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+              <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#9CA3AF" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
+              <YAxis tickFormatter={shortRupiah} tick={{ fontSize: 10, fill: "#9CA3AF" }} tickLine={false} axisLine={false} />
+              <Tooltip
+                contentStyle={{ borderRadius: "8px", border: "1px solid #E5E7EB", fontSize: 12 }}
+                formatter={(val) => [displayRupiah(val as number), "Perpuluhan"]}
+              />
+              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} formatter={() => "Perpuluhan"} />
+              <Bar dataKey="perpuluhan" fill="#8B5CF6" radius={[4, 4, 0, 0]} barSize={32} />
+              <Line
+                type="monotone"
+                dataKey="perpuluhan"
+                stroke="#F59E0B"
+                strokeWidth={2}
+                dot={{ fill: "#F59E0B", r: 4, strokeWidth: 0 }}
+                activeDot={{ r: 6, fill: "#F59E0B" }}
+                legendType="none"
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+      */}
 
       {/* Recent transactions */}
       <div className="flex flex-col w-full border border-gray-200 bg-white rounded-xl overflow-hidden">

@@ -605,7 +605,6 @@ export type Database = {
       tithes: {
         Row: {
           amount: number
-          cashflow_transaction_id: string | null
           created_at: string
           giver_name: string
           id: string
@@ -618,7 +617,6 @@ export type Database = {
         }
         Insert: {
           amount: number
-          cashflow_transaction_id?: string | null
           created_at?: string
           giver_name: string
           id?: string
@@ -631,7 +629,6 @@ export type Database = {
         }
         Update: {
           amount?: number
-          cashflow_transaction_id?: string | null
           created_at?: string
           giver_name?: string
           id?: string
@@ -648,13 +645,6 @@ export type Database = {
             columns: ["jemaat_id"]
             isOneToOne: false
             referencedRelation: "jemaat"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tithes_cashflow_transaction_id_fkey"
-            columns: ["cashflow_transaction_id"]
-            isOneToOne: false
-            referencedRelation: "cashflow_transactions"
             referencedColumns: ["id"]
           },
         ]
