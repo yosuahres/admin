@@ -28,6 +28,7 @@ export const adminNav: NavItem[] = [
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/jemaat", label: "Jemaat", icon: Users },
   { href: "/admin/icare-groups", label: "iCare Groups", icon: Church },
+  { href: "/admin/pertemuan", label: "Pertemuan iCare", icon: BookOpen },
   { href: "/admin/pelayanan", label: "Pelayanan", icon: Group },
   { href: "/admin/events", label: "Events", icon: Calendar },
   // {
