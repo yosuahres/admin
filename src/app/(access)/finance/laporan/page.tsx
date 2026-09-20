@@ -83,7 +83,11 @@ export default function LaporanKeuanganPage() {
     const lastYear = year - 1;
     // We need this year Jan..month AND last year Jan..month.
     const from = `${lastYear}-01-01`;
-    const to = `${year}-${String(month).padStart(2, "0")}-31`;
+    // Exclusive upper bound = first day of the month after the selected one.
+    // (A literal `-31` is an invalid date in 30-day months and February, which
+    // makes Postgres reject the whole query and the report render as empty.)
+    const toExclusive =
+      month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, "0")}-01`;
 
     const [
       { data: cats },
@@ -98,7 +102,7 @@ export default function LaporanKeuanganPage() {
         .from("cashflow_transactions_view")
         .select("category_id, amount, transaction_date")
         .gte("transaction_date", from)
-        .lte("transaction_date", to),
+        .lt("transaction_date", toExclusive),
     ]);
 
     if (cats) setCategories(cats);
