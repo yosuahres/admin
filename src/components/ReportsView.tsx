@@ -25,10 +25,11 @@ import ReportFilterBar from "@/components/ReportFilterBar";
 import { runReportQuery } from "@/utils/reportQuery";
 import { exportToExcel } from "@/utils/exportutils";
 import type { ActiveFilters, ReportConfig } from "@/types/report.types";
+import type { Role } from "@/constants/roles";
 import { useSetPageActions } from "@/contexts/page-actions";
 
 interface ReportsViewProps {
-  role: "admin" | "leader" | "finance";
+  role: Role;
 }
 
 function IcareSummaryBar({ data }: { data: any[] }) {

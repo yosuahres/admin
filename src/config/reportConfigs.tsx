@@ -6,7 +6,7 @@ export const REPORT_CONFIGS: ReportConfig[] = [
   {
     id: "jemaat",
     label: "Data Jemaat",
-    allowedRoles: ["admin"], // ← admin only
+    allowedRoles: ["admin", "pastor"],
     table: "jemaat",
     select: "*",
     searchColumn: "nama_lengkap",
@@ -175,7 +175,7 @@ export const REPORT_CONFIGS: ReportConfig[] = [
   {
     id: "icare_report",
     label: "Laporan iCare",
-    allowedRoles: ["admin", "leader"], // ← both roles
+    allowedRoles: ["admin", "pastor", "leader"],
     table: "icare_meetings",
     select: `*, icare_groups(nama_icare, lokasi_pertemuan, jemaat(nama_lengkap), icare_members(id))`,
     searchColumn: "topik",
@@ -280,7 +280,7 @@ export const REPORT_CONFIGS: ReportConfig[] = [
   {
     id: "usher_attendance",
     label: "Kehadiran Ibadah",
-    allowedRoles: ["admin", "leader"], // ← both roles
+    allowedRoles: ["admin", "pastor", "leader"],
     table: "attendance_reports",
     select: `
       id,
@@ -463,7 +463,7 @@ export const REPORT_CONFIGS: ReportConfig[] = [
   {
     id: "cashflow_transactions",
     label: "Transaksi Keuangan",
-    allowedRoles: ["finance", "admin"],
+    allowedRoles: ["admin", "pastor", "finance"],
     table: "cashflow_transactions_view",
     select: "*",
     searchColumn: "description",
@@ -575,7 +575,7 @@ export const REPORT_CONFIGS: ReportConfig[] = [
   {
     id: "events",
     label: "Events",
-    allowedRoles: ["admin", "leader"], // ← both roles
+    allowedRoles: ["admin", "pastor", "leader"],
     table: "events",
     select: "*",
     searchColumn: "event_name",

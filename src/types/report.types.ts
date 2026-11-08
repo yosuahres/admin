@@ -1,4 +1,5 @@
 // types/report.types.ts
+import type { Role } from "@/constants/roles";
 
 export interface FilterOption {
   value: string;
@@ -32,7 +33,7 @@ export interface ReportConfig {
   defaultSort: { column: string; ascending: boolean };
   filters: FilterConfig[];
   columns: ColumnConfig[];
-  allowedRoles?: Array<"admin" | "leader" | "finance">;
+  allowedRoles?: Role[];
   transformForExport?: (rows: any[]) => any[];
 }
 

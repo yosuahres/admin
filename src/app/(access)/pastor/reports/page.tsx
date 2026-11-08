@@ -2,5 +2,5 @@
 import ReportsView from "@/components/ReportsView";
 
 export default function PastorReportsPage() {
-  return <ReportsView role="admin" />;
+  return <ReportsView role="pastor" />;
 }
