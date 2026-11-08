@@ -1,14 +1,14 @@
 // app/api/cashflow/route.ts
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { rolesForSection } from "@/constants/roles";
+import { requireRole } from "@/lib/auth/require-role";
 
 // ── GET /api/cashflow?month=YYYY-MM&page=1&limit=50&search= ──────────────────
 export async function GET(req: NextRequest) {
+  const auth = await requireRole(rolesForSection("finance"));
+  if (!auth.ok) return auth.response;
+  const supabase = await createClient();
   const { searchParams } = req.nextUrl;
   const month  = searchParams.get("month");
   const page   = parseInt(searchParams.get("page")  || "1");
@@ -49,6 +49,9 @@ export async function GET(req: NextRequest) {
 
 // ── POST /api/cashflow ────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+  const auth = await requireRole(rolesForSection("finance"));
+  if (!auth.ok) return auth.response;
+  const supabase = await createClient();
   const body = await req.json();
 
   const { data, error } = await supabase

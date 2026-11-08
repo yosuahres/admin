@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database.types";
+import { isRole, ROLES } from "@/constants/roles";
+import { requireRole } from "@/lib/auth/require-role";
 
 const supabaseAdmin = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,11 +11,13 @@ const supabaseAdmin = createClient<Database>(
 );
 
 export async function POST(req: NextRequest) {
+  const auth = await requireRole(["admin"]);
+  if (!auth.ok) return auth.response;
   try {
     const { email, password, full_name, role } = await req.json();
     
     console.log("=== USER CREATE START ===");
-    console.log("Raw input:", { email, password, full_name, role });
+    console.log("Raw input:", { email, full_name, role });
 
     const trimmedEmail = email?.trim?.() || "";
     const trimmedFullName = full_name?.trim?.() || "";
@@ -36,10 +40,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const validRoles = ["admin", "pastor", "leader", "usher", "finance"];
-    if (!validRoles.includes(trimmedRole)) {
+    if (!isRole(trimmedRole)) {
       return NextResponse.json(
-        { error: `Role tidak valid. Pilihan: ${validRoles.join(", ")}` },
+        { error: `Role tidak valid. Pilihan: ${ROLES.join(", ")}` },
         { status: 400 },
       );
     }
@@ -62,7 +65,27 @@ export async function POST(req: NextRequest) {
 
     const userId = authData.user.id;
 
-    return NextResponse.json({ success: true, id: userId }, { status: 201 }); 
+    // The new user joins the creating admin's organization. Upsert covers both
+    // cases: the auth trigger already created the profile, or it didn't.
+    const { error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .upsert({
+        id: userId,
+        email: trimmedEmail,
+        full_name: trimmedFullName,
+        role: trimmedRole,
+        organization_id: auth.organizationId,
+      });
+
+    if (profileError) {
+      await supabaseAdmin.auth.admin.deleteUser(userId);
+      return NextResponse.json(
+        { error: `Gagal menyimpan profil: ${profileError.message}` },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ success: true, id: userId }, { status: 201 });
   } catch (err: any) {
     return NextResponse.json(
       { error: err?.message ?? "Internal server error" },

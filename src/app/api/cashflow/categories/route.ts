@@ -1,14 +1,14 @@
 // app/api/cashflow/categories/route.ts
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { rolesForSection } from "@/constants/roles";
+import { requireRole } from "@/lib/auth/require-role";
 
 // ── GET /api/cashflow/categories ──────────────────────────────────────────────
 export async function GET() {
+  const auth = await requireRole(rolesForSection("finance"));
+  if (!auth.ok) return auth.response;
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("cashflow_categories")
     .select("id, name, type")

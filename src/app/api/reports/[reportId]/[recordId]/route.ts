@@ -1,6 +1,15 @@
 // api/reports/[reportId]/[recordId]/route.ts
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { REPORT_CONFIGS } from "@/config/reportConfigs";
+import { ROLES, type Role, rolesForSection } from "@/constants/roles";
+import { requireRole } from "@/lib/auth/require-role";
+
+// Same role rules the Reports page uses to decide which reports a role sees.
+const allowedRolesFor = (reportId: string): readonly Role[] => {
+  if (reportId === "cashflow_categories") return rolesForSection("finance");
+  return REPORT_CONFIGS.find((c) => c.id === reportId)?.allowedRoles ?? ROLES;
+};
 
 export async function PATCH(
   req: NextRequest,
@@ -9,6 +18,9 @@ export async function PATCH(
   try {
     const supabase = await createClient();
     const { reportId, recordId } = await params;
+
+    const auth = await requireRole(allowedRolesFor(reportId));
+    if (!auth.ok) return auth.response;
     const body = await req.json();
 
     const tableMap: Record<string, string> = {
@@ -59,6 +71,9 @@ export async function DELETE(
   try {
     const supabase = await createClient();
     const { reportId, recordId } = await params;
+
+    const auth = await requireRole(allowedRolesFor(reportId));
+    if (!auth.ok) return auth.response;
 
     const tableMap: Record<string, string> = {
       jemaat: "jemaat",

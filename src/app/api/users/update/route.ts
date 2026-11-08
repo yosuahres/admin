@@ -1,6 +1,8 @@
 // app/api/users/update/route.ts
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { isRole, ROLES } from "@/constants/roles";
+import { isInOrganization, requireRole } from "@/lib/auth/require-role";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,10 +10,21 @@ const supabaseAdmin = createClient(
 );
 
 export async function PATCH(req: Request) {
+  const auth = await requireRole(["admin"]);
+  if (!auth.ok) return auth.response;
   try {
     const { id, email, password, full_name, role } = await req.json();
 
     if (!id) return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
+    if (!(await isInOrganization(supabaseAdmin, id, auth.organizationId))) {
+      return NextResponse.json({ error: "User tidak ditemukan." }, { status: 404 });
+    }
+    if (role !== undefined && !isRole(role)) {
+      return NextResponse.json(
+        { error: `Role tidak valid. Pilihan: ${ROLES.join(", ")}` },
+        { status: 400 },
+      );
+    }
 
     // 1. Update auth user (email and/or password)
     const authUpdate: Record<string, string> = {};

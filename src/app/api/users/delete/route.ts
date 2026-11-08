@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isInOrganization, requireRole } from "@/lib/auth/require-role";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,11 +9,17 @@ const supabaseAdmin = createClient(
 );
 
 export async function DELETE(req: NextRequest) {
+  const auth = await requireRole(["admin"]);
+  if (!auth.ok) return auth.response;
   try {
     const { id } = await req.json();
 
     if (!id || typeof id !== "string") {
       return NextResponse.json({ error: "ID tidak valid." }, { status: 400 });
+    }
+
+    if (!(await isInOrganization(supabaseAdmin, id, auth.organizationId))) {
+      return NextResponse.json({ error: "User tidak ditemukan." }, { status: 404 });
     }
 
     const { error: unlinkError } = await supabaseAdmin
