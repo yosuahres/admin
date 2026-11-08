@@ -5,6 +5,7 @@ import MasterDataTable from "@/components/MasterDataTable";
 import ModalForm from "@/components/ModalForm";
 import type { ColumnSchema } from "@/utils/exportutils";
 import { useSetPageActions } from "@/contexts/page-actions";
+import { isRole, ROLE_LABELS, ROLES } from "@/constants/roles";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/types/database.types";
 
@@ -16,13 +17,15 @@ const USERS_SCHEMA: ColumnSchema[] = [
   { key: "role",      label: "Role",             type: "string", required: true },
 ];
 
-const ROLE_OPTIONS = [
-  { value: "admin",   label: "Admin" },
-  { value: "pastor",  label: "Pastor" },
-  { value: "leader",  label: "Leader" },
-  { value: "finance", label: "Finance" },
-  { value: "usher",   label: "Usher" },
-];
+const ROLE_OPTIONS = ROLES.map((role) => ({ value: role, label: ROLE_LABELS[role] }));
+
+const ROLE_BADGE: Record<string, string> = {
+  admin:   "bg-red-100 text-red-800",
+  pastor:  "bg-blue-100 text-blue-800",
+  leader:  "bg-yellow-100 text-yellow-800",
+  finance: "bg-green-100 text-green-800",
+  usher:   "bg-purple-100 text-purple-800",
+};
 
 type ProfileWithJemaat = Profile & {
   jemaat_nama?: string | null;
@@ -96,13 +99,9 @@ export default function UsersPage() {
       label: "Role",
       render: (value: string) => (
         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-          value === "admin"  ? "bg-red-100 text-red-800"       :
-          value === "pastor" ? "bg-blue-100 text-blue-800"     :
-          value === "leader" ? "bg-yellow-100 text-yellow-800" :
-          value === "finance" ? "bg-green-100 text-green-800" :
-                               "bg-gray-100 text-gray-800"
+          ROLE_BADGE[value] ?? "bg-gray-100 text-gray-800"
         }`}>
-          {value?.charAt(0).toUpperCase() + value?.slice(1)}
+          {isRole(value) ? ROLE_LABELS[value] : value || "—"}
         </span>
       ),
     },
@@ -262,15 +261,14 @@ export default function UsersPage() {
     const payload = rows.map((row) => ({
       id:        row.id?.trim(),
       full_name: row.full_name?.trim(),
-      role:      row.role?.trim().toLowerCase() || "finance",
+      role:      row.role?.trim().toLowerCase() ?? "",
     }));
 
-    const validRoles = new Set(["admin", "pastor", "leader", "finance", "usher"]);
-    const invalidRows = payload.filter((r) => !validRoles.has(r.role));
+    const invalidRows = payload.filter((r) => !isRole(r.role));
     if (invalidRows.length > 0) {
       throw new Error(
         `Role tidak valid: ${invalidRows.map((r) => `"${r.role}"`).join(", ")}. ` +
-        `Diizinkan: admin, pastor, leader, finance, usher.`,
+        `Diizinkan: ${ROLES.join(", ")}.`,
       );
     }
 

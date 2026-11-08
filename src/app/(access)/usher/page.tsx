@@ -154,32 +154,23 @@ function Skeleton({ className = "" }: { className?: string }) {
 export default function UsherDashboardPage() {
   const supabase = createClient();
 
-  const [authorized, setAuthorized] = useState(false);
   const [reports, setReports] = useState<AttendanceReport[]>([]);
   const [upcoming, setUpcoming] = useState<UpcomingOccurrence[]>([]);
   const [loading, setLoading] = useState(true);
   const [upcomingLoading, setUpcomingLoading] = useState(true);
   const [filters, setFilters] = useState<ActiveFilters>({});
 
-  useEffect(() => {
-    const role = localStorage.getItem("role");
-    if (role === "usher") setAuthorized(true);
-    else window.location.href = "/login";
-  }, []);
-
   // Upcoming events — loaded once (not affected by filters)
   useEffect(() => {
-    if (!authorized) return;
     loadUpcoming();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authorized]);
+  }, []);
 
   // Reports (KPIs, chart, table) — reloaded whenever filters change
   useEffect(() => {
-    if (!authorized) return;
     loadReports();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authorized, filters]);
+  }, [filters]);
 
   const loadUpcoming = async () => {
     setUpcomingLoading(true);
@@ -290,8 +281,6 @@ export default function UsherDashboardPage() {
   );
 
   const recentReports = reports.slice(0, 6);
-
-  if (!authorized) return null;
 
   const activeFilterCount = Object.keys(filters).length;
 

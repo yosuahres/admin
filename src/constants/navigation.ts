@@ -15,6 +15,8 @@ import {
   Users,
 } from "lucide-react";
 
+import type { Role } from "@/constants/roles";
+
 export type NavItem = {
   href?: string;           
   label: string;
@@ -78,7 +80,7 @@ export const pastorNav: NavItem[] = [
   { href: "/pastor/reports", label: "Reports", icon: BookOpen },
 ];
 
-export const navByRole: Record<string, NavItem[]> = {
+export const navByRole: Record<Role, NavItem[]> = {
   admin: adminNav,
   leader: leaderNav,
   finance: financeNav,

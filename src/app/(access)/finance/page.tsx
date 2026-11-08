@@ -206,7 +206,6 @@ function CalendarPicker({
 }
 
 export default function FinanceDashboardPage() {
-  const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
   const [allMonthly, setAllMonthly] = useState<MonthlySummaryRow[]>([]);
   const [catData, setCatData] = useState<Pick<TxViewRow, "type" | "category_name" | "amount" | "transaction_date">[]>([]);
@@ -230,13 +229,7 @@ export default function FinanceDashboardPage() {
   }, []);
 
   useEffect(() => {
-    const role = localStorage.getItem("role");
-    if (role === "finance" || role === "admin") {
-      setAuthorized(true);
-      fetchData();
-    } else {
-      window.location.href = "/login";
-    }
+    fetchData();
   }, []);
 
   async function fetchData() {
@@ -384,7 +377,6 @@ export default function FinanceDashboardPage() {
 
   // const titheTotal = filteredTithes.reduce((s, t) => s + Number(t.amount ?? 0), 0);
 
-  if (!authorized) return null;
 
   return (
     <div className="p-4 flex flex-col gap-3">

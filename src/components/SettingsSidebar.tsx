@@ -39,7 +39,7 @@ export default function SettingsSidebar({ mobileOpen = false, onMobileClose }: S
         .eq("id", authUser.id)
         .maybeSingle();
       if (profile) {
-        setUser({ full_name: profile.full_name, role: profile.role ?? "finance", email: authUser.email ?? "" });
+        setUser({ full_name: profile.full_name, role: profile.role ?? "", email: authUser.email ?? "" });
       }
     };
     fetchUser();

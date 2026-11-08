@@ -69,7 +69,6 @@ function periodRange(periodType: PeriodType, year: number, month: number) {
 
 export default function BudgetPage() {
   const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const now = new Date();
@@ -101,15 +100,6 @@ export default function BudgetPage() {
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  useEffect(() => {
-    const role = localStorage.getItem("role");
-    if (role === "finance" || role === "admin") {
-      setAuthorized(true);
-    } else {
-      window.location.href = "/login";
-    }
   }, []);
 
   const fetchData = useCallback(async () => {
@@ -150,8 +140,8 @@ export default function BudgetPage() {
   }, [periodType, year, month]);
 
   useEffect(() => {
-    if (authorized) fetchData();
-  }, [authorized, fetchData]);
+    fetchData();
+  }, [fetchData]);
 
   // All budget entries for a category (ledger), and the summed "Rencana" total.
   const entriesByCat = useMemo(() => {
@@ -165,7 +155,6 @@ export default function BudgetPage() {
     return map;
   }, [budgets]);
 
-  if (!authorized) return null;
 
   const incomeCats = categories.filter((c) => c.type === "in");
   const expenseCats = categories.filter((c) => c.type === "out");

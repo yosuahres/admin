@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { type NavItem, navByRole } from "@/constants/navigation";
+import { isRole } from "@/constants/roles";
 import { createClient } from "@/lib/supabase/client";
 import { logout } from "@/lib/supabase/logout";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -20,7 +21,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
   const [collapsed, setCollapsed] = useState(false);
   const [navItems, setNavItems] = useState<NavItem[]>([]);
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
-  const [user, setUser] = useState<{ full_name: string; role: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ full_name: string; role: string; email: string; organization: string } | null>(null);
   const [open, setOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -51,12 +52,17 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
       if (!authUser) return;
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name, role")
+        .select("full_name, role, organizations(name)")
         .eq("id", authUser.id)
         .maybeSingle();
       if (profile) {
-        setNavItems(navByRole[profile.role ?? "finance"] ?? []);
-        setUser({ full_name: profile.full_name, role: profile.role ?? "finance", email: authUser.email ?? "" });
+        setNavItems(isRole(profile.role) ? navByRole[profile.role] : []);
+        setUser({
+          full_name: profile.full_name,
+          role: profile.role ?? "",
+          email: authUser.email ?? "",
+          organization: profile.organizations?.name ?? "",
+        });
       }
     };
     fetchUser();
@@ -260,6 +266,9 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
                     </span>
                   </div>
                   <p className="text-xs text-gray-400 truncate mt-0.5">{user.email}</p>
+                  {user.organization && (
+                    <p className="text-xs text-gray-500 truncate mt-0.5">{user.organization}</p>
+                  )}
                 </div>
               </div>
               {/* Menu items */}

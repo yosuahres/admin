@@ -51,7 +51,6 @@ function fmt(n: number) {
 /* ── Page ──────────────────────────────────────────────────────────── */
 
 export default function LaporanKeuanganPage() {
-  const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const now = new Date();
@@ -70,12 +69,6 @@ export default function LaporanKeuanganPage() {
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  useEffect(() => {
-    const role = localStorage.getItem("role");
-    if (role === "finance" || role === "admin") setAuthorized(true);
-    else window.location.href = "/login";
   }, []);
 
   const fetchData = useCallback(async () => {
@@ -112,8 +105,8 @@ export default function LaporanKeuanganPage() {
   }, [year, month]);
 
   useEffect(() => {
-    if (authorized) fetchData();
-  }, [authorized, fetchData]);
+    fetchData();
+  }, [fetchData]);
 
   /** category_id -> the six computed values for the selected period. */
   const valuesByCat = useMemo(() => {
@@ -305,7 +298,6 @@ export default function LaporanKeuanganPage() {
   exportRef.current = exportReport;
   useSetPageActions({ onExport: () => exportRef.current() });
 
-  if (!authorized) return null;
 
   const yy = String(year).slice(2);
   const yyLast = String(year - 1).slice(2);

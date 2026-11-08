@@ -41,7 +41,6 @@ const ALL_COLUMNS = [
 ];
 
 export default function AnggotaPage() {
-  const [authorized, setAuthorized] = useState(false);
   const [group, setGroup] = useState<{ id: string; nama_icare: string } | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [allJemaat, setAllJemaat] = useState<Jemaat[]>([]);
@@ -83,8 +82,6 @@ export default function AnggotaPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    if (localStorage.getItem("role") !== "leader") { window.location.href = "/login"; return; }
-    setAuthorized(true);
     loadData();
   }, []);
 
@@ -278,7 +275,7 @@ export default function AnggotaPage() {
 
   const selectedCount = selectedIds.size;
 
-  if (!authorized || loadingPage) return null;
+  if (loadingPage) return null;
 
   return (
     <div className="p-4">

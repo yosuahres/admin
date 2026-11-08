@@ -1,16 +1,8 @@
 // src/components/AuthForm.tsx
 "use client";
 import { useState } from "react";
+import { isRole, ROLE_HOME } from "@/constants/roles";
 import { createClient } from "@/lib/supabase/client";
-
-
-const roleRedirect: Record<string, string> = {
-  admin: "/admin",
-  leader: "/leader",
-  pastor: "/pastor",
-  finance: "/finance",
-  usher: "/usher",
-};
 
 export default function AuthForm() {
   const [email, setEmail] = useState("");
@@ -35,17 +27,19 @@ export default function AuthForm() {
     } else if (data?.user) {
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("role")
+        .select("role, organization_id")
         .eq("id", data.user.id)
-        .maybeSingle<{ role: "admin" | "pastor" | "leader" | "finance" | "usher" }>();
+        .maybeSingle();
 
       if (profileError) {
         setError(profileError.message);
       } else if (!profile) {
         setError("Profile not found. Please contact support.");
-      } else if (profile && typeof profile.role === "string") {
-        localStorage.setItem("role", profile.role);
-        window.location.href = roleRedirect[profile.role] ?? "/";
+      } else if (isRole(profile.role) && profile.organization_id) {
+        window.location.href = ROLE_HOME[profile.role];
+      } else {
+        await supabase.auth.signOut();
+        setError("Akun ini belum memiliki role atau organisasi yang valid. Hubungi admin.");
       }
     }
 

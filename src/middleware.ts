@@ -1,6 +1,7 @@
 // middleware.ts
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { canAccess, isProtectedRoute, isRole, ROLE_HOME } from "@/constants/roles";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -35,122 +36,41 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
+  const redirectTo = (path: string) =>
+    NextResponse.redirect(new URL(path, request.url));
 
-  if (pathname === "/") {
-    return NextResponse.redirect(new URL("/login", request.url));
+  if (pathname === "/") return redirectTo("/login");
+
+  const isProtected = isProtectedRoute(pathname);
+  const isLogin = pathname.startsWith("/login");
+
+  if (!user) {
+    return isProtected ? redirectTo("/login") : response;
   }
 
-  if (
-    !user &&
-    (pathname.startsWith("/admin") ||
-      pathname.startsWith("/leader") ||
-      pathname.startsWith("/usher") ||
-      pathname.startsWith("/finance") ||
-      pathname.startsWith("/pastor"))
-  ) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  if (!isProtected && !isLogin) return response;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, organization_id")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  // A user needs both a valid role and an organization to use the app.
+  const profileRole = profile?.role;
+  const role =
+    isRole(profileRole) && profile?.organization_id ? profileRole : null;
+
+  if (isLogin) {
+    // Signed-in users with a valid role skip the login page. Users without a
+    // valid role or organization stay here so they see the error instead of
+    // looping.
+    return role ? redirectTo(ROLE_HOME[role]) : response;
   }
 
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+  if (!role) return redirectTo("/login?error=unauthorized");
 
-    const role = profile?.role;
-
-    if (
-      !role &&
-      (pathname.startsWith("/admin") ||
-        pathname.startsWith("/leader") ||
-        pathname.startsWith("/usher") ||
-        pathname.startsWith("/finance") ||
-        pathname.startsWith("/pastor"))
-    ) {
-      return NextResponse.redirect(
-        new URL("/login?error=unauthorized", request.url),
-      );
-    }
-
-    // Redirect admin away from non-admin routes
-    if (role === "admin" && (pathname.startsWith("/leader") || pathname.startsWith("/usher"))) {
-      return NextResponse.redirect(new URL("/admin", request.url));
-    }
-
-    // Redirect leader away from non-leader routes
-    if (role === "leader" && (pathname.startsWith("/admin") || pathname.startsWith("/usher"))) {
-      return NextResponse.redirect(new URL("/leader", request.url));
-    }
-
-    // Redirect usher away from non-usher routes
-    if (role === "usher" && (pathname.startsWith("/admin") || pathname.startsWith("/leader"))) {
-      return NextResponse.redirect(new URL("/usher", request.url));
-    }
-
-    // Redirect pastor away from non-pastor routes
-    if (role === "pastor" && (pathname.startsWith("/admin") || pathname.startsWith("/leader") || pathname.startsWith("/usher") || pathname.startsWith("/finance"))) {
-      return NextResponse.redirect(new URL("/pastor", request.url));
-    }
-
-    // Guard /pastor route — only pastor role allowed
-    if (pathname.startsWith("/pastor") && role !== "pastor") {
-      const dest =
-        role === "admin" ? "/admin"
-        : role === "leader" ? "/leader"
-        : role === "finance" ? "/finance"
-        : role === "usher" ? "/usher"
-        : "/login?error=unauthorized";
-      return NextResponse.redirect(new URL(dest, request.url));
-    }
-
-    // Guard /finance route — only admin and finance roles allowed
-    if (
-      pathname.startsWith("/finance") &&
-      role !== "admin" &&
-      role !== "finance"
-    ) {
-      const dest =
-        role === "leader"
-          ? "/leader"
-          : role === "usher"
-          ? "/usher"
-          : "/login?error=unauthorized";
-      return NextResponse.redirect(new URL(dest, request.url));
-    }
-
-    // Guard /usher route — only usher (and optionally admin) allowed
-    if (
-      pathname.startsWith("/usher") &&
-      role !== "usher" &&
-      role !== "admin"
-    ) {
-      const dest =
-        role === "leader"
-          ? "/leader"
-          : role === "finance"
-          ? "/finance"
-          : "/login?error=unauthorized";
-      return NextResponse.redirect(new URL(dest, request.url));
-    }
-
-    // Redirect logged-in users away from /login
-    if (pathname.startsWith("/login")) {
-      const dest =
-        role === "admin"
-          ? "/admin"
-          : role === "leader"
-          ? "/leader"
-          : role === "usher"
-          ? "/usher"
-          : role === "finance"
-          ? "/finance"
-          : role === "pastor"
-          ? "/pastor"
-          : "/login";
-      return NextResponse.redirect(new URL(dest, request.url));
-    }
-  }
+  if (!canAccess(role, pathname)) return redirectTo(ROLE_HOME[role]);
 
   return response;
 }

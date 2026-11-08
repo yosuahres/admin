@@ -89,7 +89,6 @@ const ALL_COLUMNS = [
 ];
 
 export default function PertemuanPage() {
-  const [authorized, setAuthorized] = useState(false);
   const [group, setGroup] = useState<IcareGroup | null>(null);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [members, setMembers] = useState<Jemaat[]>([]);
@@ -142,11 +141,6 @@ export default function PertemuanPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    if (localStorage.getItem("role") !== "leader") {
-      window.location.href = "/login";
-      return;
-    }
-    setAuthorized(true);
     loadData();
   }, []);
 
@@ -372,7 +366,7 @@ export default function PertemuanPage() {
 
   const presentCount = Object.values(attendance).filter(Boolean).length;
 
-  if (!authorized || loadingPage) return null;
+  if (loadingPage) return null;
 
   return (
     <div className="p-4">

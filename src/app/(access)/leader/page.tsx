@@ -107,7 +107,6 @@ function EmptyChart({ message = "Belum ada data" }: { message?: string }) {
 }
 
 export default function LeaderDashboardPage() {
-  const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
   const [group, setGroup] = useState<IcareGroup | null>(null);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
@@ -117,12 +116,6 @@ export default function LeaderDashboardPage() {
   );
 
   useEffect(() => {
-    if (localStorage.getItem("role") !== "leader") {
-      window.location.href = "/login";
-      return;
-    }
-    setAuthorized(true);
-
     const loadData = async () => {
       const supabase = createClient();
       setLoading(true);
@@ -236,7 +229,6 @@ export default function LeaderDashboardPage() {
   const avgRate =
     members.length > 0 ? Math.round((avgAttendance / members.length) * 100) : 0;
 
-  if (!authorized) return null;
 
   if (loading) {
     return (
