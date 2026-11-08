@@ -649,11 +649,33 @@ export type Database = {
           },
         ]
       }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           email: string | null
           full_name: string
           id: string
+          organization_id: string | null
           role: string | null
           updated_at: string | null
         }
@@ -661,6 +683,7 @@ export type Database = {
           email?: string | null
           full_name: string
           id: string
+          organization_id?: string | null
           role?: string | null
           updated_at?: string | null
         }
@@ -668,10 +691,19 @@ export type Database = {
           email?: string | null
           full_name?: string
           id?: string
+          organization_id?: string | null
           role?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
