@@ -336,9 +336,9 @@ export default function LaporanKeuanganPage() {
   };
 
   const SectionHeader = ({ letter, title }: { letter: string; title: string }) => (
-    <tr className="bg-blue-50">
-      <td className="px-2 py-1.5 text-center font-bold text-blue-700">{letter}</td>
-      <td className="px-3 py-1.5 font-bold text-blue-700 uppercase tracking-wide text-xs" colSpan={7}>
+    <tr className="bg-neutral-100">
+      <td className="px-2 py-1.5 text-center font-bold text-neutral-900">{letter}</td>
+      <td className="px-3 py-1.5 font-bold text-neutral-900 uppercase tracking-wide text-xs" colSpan={7}>
         {title}
       </td>
     </tr>
@@ -391,7 +391,7 @@ export default function LaporanKeuanganPage() {
                     key={m}
                     onClick={() => { setMonth(i + 1); setPickerOpen(false); }}
                     className={`text-xs py-1.5 rounded-md transition-colors ${
-                      month === i + 1 ? "bg-blue-500 text-white font-medium" : "text-gray-600 hover:bg-gray-100"
+                      month === i + 1 ? "bg-neutral-900 text-white font-medium" : "text-gray-600 hover:bg-gray-100"
                     }`}
                   >
                     {m}

@@ -192,7 +192,7 @@ export function SimpleSelect({
         ref={buttonRef}
         type="button"
         onClick={handleToggle}
-        className="w-full flex items-center justify-between px-2 py-1.5 text-sm border border-gray-200 rounded-md bg-white hover:border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-400 text-left"
+        className="w-full flex items-center justify-between px-2 py-1.5 text-sm border border-gray-200 rounded-md bg-white hover:border-gray-300 focus:outline-none focus:ring-1 focus:ring-neutral-900 text-left"
       >
         <span className="text-gray-700">{selected?.label}</span>
         <ChevronDown size={13} className="text-gray-400 shrink-0 ml-1" />
@@ -210,7 +210,7 @@ export function SimpleSelect({
               type="button"
               onClick={() => { onChange(opt.value); setOpen(false); }}
               className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 transition-colors ${
-                value === opt.value ? "font-semibold text-blue-600" : "text-gray-700"
+                value === opt.value ? "font-semibold text-neutral-900" : "text-gray-700"
               }`}
             >
               {opt.label}
@@ -267,7 +267,7 @@ export function CategorySelect({
         ref={buttonRef}
         type="button"
         onClick={handleToggle}
-        className="w-full flex items-center justify-between px-2 py-1.5 text-sm border border-gray-200 rounded-md bg-white hover:border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-400 text-left"
+        className="w-full flex items-center justify-between px-2 py-1.5 text-sm border border-gray-200 rounded-md bg-white hover:border-gray-300 focus:outline-none focus:ring-1 focus:ring-neutral-900 text-left"
       >
         <span className={selected ? "text-gray-800 truncate" : "text-gray-400"}>
           {selected ? selected.name : "— Pilih —"}
@@ -294,7 +294,7 @@ export function CategorySelect({
               type="button"
               onClick={() => { onChange(cat.id); setOpen(false); }}
               className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 transition-colors ${
-                value === cat.id ? "font-semibold text-blue-600" : "text-gray-700"
+                value === cat.id ? "font-semibold text-neutral-900" : "text-gray-700"
               }`}
             >
               {cat.name}
@@ -338,7 +338,7 @@ export function SessionForm({
             type="date"
             value={date}
             onChange={(e) => onDateChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
           />
         </div>
         <div className="space-y-1.5">
@@ -348,7 +348,7 @@ export function SessionForm({
             placeholder="Misal: Kebaktian Minggu Pagi..."
             value={description}
             onChange={(e) => onDescriptionChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
           />
         </div>
       </div>
@@ -452,7 +452,7 @@ export function LineItemsTable({
                     placeholder="Deskripsi..."
                     value={item.description}
                     onChange={(e) => onUpdate(item.id, "description", e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -466,7 +466,7 @@ export function LineItemsTable({
                         placeholder="0"
                         value={item.amount}
                         onChange={(e) => onUpdate(item.id, "amount", formatRupiah(e.target.value))}
-                        className="w-full pl-8 pr-2 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-right"
+                        className="w-full pl-8 pr-2 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900 text-right"
                       />
                     </div>
                   </div>
@@ -477,7 +477,7 @@ export function LineItemsTable({
                       placeholder="Opsional..."
                       value={item.notes}
                       onChange={(e) => onUpdate(item.id, "notes", e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400"
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900"
                     />
                   </div>
                 </div>
@@ -538,7 +538,7 @@ export function LineItemsTable({
                         placeholder="Deskripsi..."
                         value={item.description}
                         onChange={(e) => onUpdate(item.id, "description", e.target.value)}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400"
+                        className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900"
                       />
                     </td>
                     <td className="px-3 py-2">
@@ -550,7 +550,7 @@ export function LineItemsTable({
                           placeholder="0"
                           value={item.amount}
                           onChange={(e) => onUpdate(item.id, "amount", formatRupiah(e.target.value))}
-                          className="w-full pl-8 pr-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-right"
+                          className="w-full pl-8 pr-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900 text-right"
                         />
                       </div>
                     </td>
@@ -560,7 +560,7 @@ export function LineItemsTable({
                         placeholder="Opsional..."
                         value={item.notes}
                         onChange={(e) => onUpdate(item.id, "notes", e.target.value)}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400"
+                        className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900"
                       />
                     </td>
                     <td className="px-3 py-2 text-center">
@@ -594,7 +594,7 @@ export function LineItemsTable({
 
       {/* Add Category Modal */}
       {addingForItemId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-scrim/40 backdrop-blur-sm">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h2 className="text-base font-semibold text-gray-900">Tambah Kategori</h2>
@@ -628,7 +628,7 @@ export function LineItemsTable({
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleSaveCat(); }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
                 />
               </div>
             </div>

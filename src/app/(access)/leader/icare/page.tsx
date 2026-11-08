@@ -61,11 +61,11 @@ function CheckboxRow({ label, checked, onToggle }: { label: string; checked: boo
       type="button"
       onClick={onToggle}
       className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border text-sm text-left w-full transition-colors ${
-        checked ? "bg-blue-50 border-blue-200 text-blue-800" : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+        checked ? "bg-neutral-100 border-neutral-200 text-neutral-900" : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
       }`}
     >
       <div className={`w-4 h-4 rounded border shrink-0 flex items-center justify-center transition-colors ${
-        checked ? "bg-blue-600 border-blue-600" : "bg-white border-gray-300"
+        checked ? "bg-neutral-900 border-neutral-900" : "bg-white border-gray-300"
       }`}>
         {checked && <Check size={10} className="text-white" strokeWidth={3} />}
       </div>
@@ -185,7 +185,7 @@ export default function IcareMeetingsPage() {
 
       {/* Modal: new meeting form */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/25 p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-scrim/25 p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col border border-gray-200">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-900">Catat Pertemuan Baru</h2>
@@ -198,34 +198,34 @@ export default function IcareMeetingsPage() {
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Tanggal *</label>
                   <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Lokasi</label>
                   <input type="text" value={lokasi} onChange={(e) => setLokasi(e.target.value)}
                     placeholder={group?.lokasi_pertemuan ?? ""}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900" />
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">Topik / Firman</label>
                 <input type="text" value={topik} onChange={(e) => setTopik(e.target.value)}
                   placeholder="Topik atau judul firman"
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">Catatan</label>
                 <textarea value={catatan} onChange={(e) => setCatatan(e.target.value)} rows={2}
                   placeholder="Catatan tambahan..."
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 resize-none" />
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-medium text-gray-500">
-                    Kehadiran — <span className="text-blue-600 font-semibold">{presentCount}/{members.length}</span>
+                    Kehadiran — <span className="text-neutral-900 font-semibold">{presentCount}/{members.length}</span>
                   </label>
                   <div className="flex gap-3 text-xs">
-                    <button onClick={() => { const a: AttendanceMap = {}; members.forEach((m) => { a[m.id] = true; }); setAttendance(a); }} className="text-blue-600 hover:underline">Semua</button>
+                    <button onClick={() => { const a: AttendanceMap = {}; members.forEach((m) => { a[m.id] = true; }); setAttendance(a); }} className="font-medium text-neutral-900 underline underline-offset-2 hover:opacity-70">Semua</button>
                     <button onClick={() => { const a: AttendanceMap = {}; members.forEach((m) => { a[m.id] = false; }); setAttendance(a); }} className="text-gray-400 hover:underline">Reset</button>
                   </div>
                 </div>
@@ -298,7 +298,7 @@ export default function IcareMeetingsPage() {
                   <Calendar size={18} className="text-gray-300" />
                 </div>
                 <p className="text-sm text-gray-500">Belum ada pertemuan</p>
-                <button onClick={() => setShowForm(true)} className="text-xs text-blue-600 hover:underline mt-1">Catat sekarang</button>
+                <button onClick={() => setShowForm(true)} className="text-xs font-medium text-neutral-900 underline underline-offset-2 hover:opacity-70 mt-1">Catat sekarang</button>
               </div>
             ) : (
               <>
@@ -312,11 +312,11 @@ export default function IcareMeetingsPage() {
                   return (
                     <button key={meeting.id} onClick={() => selectMeeting(meeting.id)}
                       className={`w-full flex items-start gap-3 px-4 py-3.5 border-b border-gray-100 text-left transition-colors ${
-                        isSelected ? "bg-white border-l-[3px] border-l-blue-600" : "hover:bg-white"
+                        isSelected ? "bg-white border-l-[3px] border-l-neutral-900" : "hover:bg-white"
                       }`}
                     >
-                      <div className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center shrink-0 mt-0.5 ${isSelected ? "bg-blue-600" : "bg-white border border-gray-200"}`}>
-                        <span className={`text-[0.5rem] uppercase font-semibold tracking-wide leading-none ${isSelected ? "text-blue-200" : "text-gray-400"}`}>{d.month}</span>
+                      <div className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center shrink-0 mt-0.5 ${isSelected ? "bg-neutral-900" : "bg-white border border-gray-200"}`}>
+                        <span className={`text-[0.5rem] uppercase font-semibold tracking-wide leading-none ${isSelected ? "text-neutral-400" : "text-gray-400"}`}>{d.month}</span>
                         <span className={`text-sm font-bold leading-tight ${isSelected ? "text-white" : "text-gray-700"}`}>{d.day}</span>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -324,7 +324,7 @@ export default function IcareMeetingsPage() {
                         <p className="text-xs text-gray-400 mt-0.5 truncate">{d.full}</p>
                         <div className="flex items-center gap-2 mt-2">
                           <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
-                            <div className="h-full bg-blue-400 rounded-full" style={{ width: `${pct}%` }} />
+                            <div className="h-full bg-neutral-800 rounded-full" style={{ width: `${pct}%` }} />
                           </div>
                           <span className="text-[10px] text-gray-400 tabular-nums shrink-0">{meeting.jumlah_hadir}/{members.length}</span>
                         </div>
@@ -363,10 +363,10 @@ export default function IcareMeetingsPage() {
                     </button>
 
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-blue-600 flex flex-col items-center justify-center shrink-0">
-                        <span className="text-[0.55rem] text-blue-200 uppercase font-semibold tracking-wide leading-none">{d.month}</span>
+                      <div className="w-12 h-12 rounded-xl bg-neutral-900 flex flex-col items-center justify-center shrink-0">
+                        <span className="text-[0.55rem] text-neutral-400 uppercase font-semibold tracking-wide leading-none">{d.month}</span>
                         <span className="text-lg font-bold text-white leading-tight">{d.day}</span>
-                        <span className="text-[0.5rem] text-blue-300 leading-none">{d.year}</span>
+                        <span className="text-[0.5rem] text-neutral-400 leading-none">{d.year}</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <h2 className="text-base font-semibold text-gray-900 leading-snug">
@@ -382,7 +382,7 @@ export default function IcareMeetingsPage() {
                           <Users size={12} className="text-gray-400" />
                           <span className="text-xs text-gray-500">{selectedMeeting.jumlah_hadir} dari {members.length} hadir</span>
                           <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
-                            <div className="h-full bg-blue-500 rounded-full"
+                            <div className="h-full bg-neutral-900 rounded-full"
                               style={{ width: `${members.length > 0 ? Math.round((selectedMeeting.jumlah_hadir / members.length) * 100) : 0}%` }} />
                           </div>
                         </div>

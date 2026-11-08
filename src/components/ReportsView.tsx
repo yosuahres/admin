@@ -412,7 +412,7 @@ export default function ReportsView({ role }: ReportsViewProps) {
               {loading ? (
                 <tr>
                   <td colSpan={config.columns.length + 1} className="py-20 text-center">
-                    <Loader2 className="animate-spin mx-auto text-blue-500" size={24} />
+                    <Loader2 className="animate-spin mx-auto text-neutral-500" size={24} />
                   </td>
                 </tr>
               ) : data.length === 0 ? (
@@ -424,7 +424,7 @@ export default function ReportsView({ role }: ReportsViewProps) {
                       {activeFilterCount > 0 && (
                         <button
                           onClick={handleClearFilters}
-                          className="text-xs text-blue-500 hover:underline"
+                          className="text-xs text-neutral-500 hover:underline"
                         >
                           Reset semua filter
                         </button>
@@ -447,7 +447,7 @@ export default function ReportsView({ role }: ReportsViewProps) {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleEditClick(row)}
-                          className="p-1.5 hover:bg-blue-50 rounded-lg text-blue-600 hover:text-blue-700 transition-colors"
+                          className="p-1.5 hover:bg-neutral-100 rounded-lg text-neutral-900 hover:text-neutral-900 transition-colors"
                           title="Edit"
                         >
                           <Edit2 size={16} />
@@ -511,7 +511,7 @@ export default function ReportsView({ role }: ReportsViewProps) {
 
       {/* Edit Modal */}
       {editingRow && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">Edit Data</h2>
@@ -547,7 +547,7 @@ export default function ReportsView({ role }: ReportsViewProps) {
                               [col.key]: e.target.value,
                             }))
                           }
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-1 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-1 focus:ring-neutral-900"
                           rows={3}
                         />
                       ) : col.inputType === "select" && col.options ? (
@@ -559,7 +559,7 @@ export default function ReportsView({ role }: ReportsViewProps) {
                               [col.key]: e.target.value,
                             }))
                           }
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-1 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-1 focus:ring-neutral-900"
                         >
                           <option value="">-- Pilih --</option>
                           {col.options.map((opt) => (
@@ -578,7 +578,7 @@ export default function ReportsView({ role }: ReportsViewProps) {
                               [col.key]: e.target.value,
                             }))
                           }
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-1 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-1 focus:ring-neutral-900"
                         />
                       )}
                     </div>
@@ -611,7 +611,7 @@ export default function ReportsView({ role }: ReportsViewProps) {
 
       {/* Delete Confirmation Modal */}
       {deletingId && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 space-y-4">
             <h2 className="text-lg font-semibold text-gray-900">Hapus Data</h2>
             <p className="text-sm text-gray-600">

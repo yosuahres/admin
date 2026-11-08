@@ -68,7 +68,7 @@ function FilterInput({
           onChange={(f, t) => onChange(!f && !t ? undefined : { from: f, to: t })}
           buttonClassName={`w-full flex items-center pl-3 pr-2.5 py-1.5 text-sm border rounded-lg outline-none cursor-pointer transition-colors ${
             hasVal
-              ? "bg-blue-50 text-blue-700 font-semibold border-blue-200"
+              ? "bg-neutral-100 text-neutral-900 font-semibold border-neutral-200"
               : "bg-gray-100 text-gray-500 font-normal border-transparent hover:bg-gray-200"
           }`}
         />

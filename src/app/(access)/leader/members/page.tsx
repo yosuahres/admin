@@ -282,7 +282,7 @@ export default function AnggotaPage() {
 
       {/* ── Add Modal (command-palette style) ─────────────────────────────────── */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[8vh] bg-black/30 px-4">
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[8vh] bg-scrim/30 px-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-200 flex flex-col overflow-hidden max-h-[82vh]">
 
             {/* Search bar */}
@@ -330,7 +330,7 @@ export default function AnggotaPage() {
                       onClick={() => { setAddFocusedIdx(idx); setAddSelected((prev) => { const n = new Set(prev); n.has(j.id) ? n.delete(j.id) : n.add(j.id); return n; }); }}
                       className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                         isSelected
-                          ? "bg-blue-50 hover:bg-blue-100"
+                          ? "bg-neutral-100 hover:bg-neutral-200"
                           : isFocused
                           ? "bg-gray-100"
                           : "hover:bg-gray-50"
@@ -338,21 +338,21 @@ export default function AnggotaPage() {
                     >
                       {/* Checkbox */}
                       <div className={`w-4 h-4 rounded border shrink-0 flex items-center justify-center transition-colors ${
-                        isSelected ? "bg-blue-600 border-blue-600" : "bg-white border-gray-300"
+                        isSelected ? "bg-neutral-900 border-neutral-900" : "bg-white border-gray-300"
                       }`}>
                         {isSelected && <Check size={10} className="text-white" strokeWidth={3} />}
                       </div>
 
                       {/* Avatar */}
                       <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold ${
-                        isSelected ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"
+                        isSelected ? "bg-neutral-200 text-neutral-900" : "bg-gray-100 text-gray-500"
                       }`}>
                         {j.nama_lengkap.charAt(0).toUpperCase()}
                       </div>
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium truncate ${isSelected ? "text-blue-900" : "text-gray-900"}`}>
+                        <p className={`text-sm font-medium truncate ${isSelected ? "text-neutral-900" : "text-gray-900"}`}>
                           {j.nama_lengkap}
                         </p>
                         <p className="text-xs text-gray-400 truncate">
@@ -417,7 +417,7 @@ export default function AnggotaPage() {
               <Search size={14} className="absolute left-2.5 text-gray-400 pointer-events-none" />
               <input type="text" value={searchInput} onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Cari anggota..."
-                className="w-full pl-8 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-gray-400" />
+                className="w-full pl-8 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900 placeholder:text-gray-400" />
               {searchInput && (
                 <button onClick={() => setSearchInput("")} className="absolute right-2 text-gray-400 hover:text-gray-600">
                   <X size={13} />
@@ -432,7 +432,7 @@ export default function AnggotaPage() {
               <button onClick={() => setSortOpen((v) => !v)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-lg shadow-sm transition-colors ${
                   sortKey !== "nama_lengkap"
-                    ? "border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"
+                    ? "border-neutral-300 text-neutral-900 bg-neutral-100 hover:bg-neutral-200"
                     : "border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
                 }`}>
                 <ListFilter size={14} /> Urutkan
@@ -442,11 +442,11 @@ export default function AnggotaPage() {
                   <p className="px-3 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Urutkan</p>
                   <div className="flex gap-1 px-3 pb-2">
                     <button onClick={() => { setSortDir("asc"); setPage(1); }}
-                      className={`flex-1 flex items-center justify-center gap-1 py-1 text-xs rounded-md border transition-colors ${sortDir === "asc" ? "border-blue-400 bg-blue-50 text-blue-700 font-medium" : "border-gray-200 text-gray-500 hover:bg-gray-50"}`}>
+                      className={`flex-1 flex items-center justify-center gap-1 py-1 text-xs rounded-md border transition-colors ${sortDir === "asc" ? "border-neutral-300 bg-neutral-100 text-neutral-900 font-medium" : "border-gray-200 text-gray-500 hover:bg-gray-50"}`}>
                       <ArrowUp size={11} /> A → Z
                     </button>
                     <button onClick={() => { setSortDir("desc"); setPage(1); }}
-                      className={`flex-1 flex items-center justify-center gap-1 py-1 text-xs rounded-md border transition-colors ${sortDir === "desc" ? "border-blue-400 bg-blue-50 text-blue-700 font-medium" : "border-gray-200 text-gray-500 hover:bg-gray-50"}`}>
+                      className={`flex-1 flex items-center justify-center gap-1 py-1 text-xs rounded-md border transition-colors ${sortDir === "desc" ? "border-neutral-300 bg-neutral-100 text-neutral-900 font-medium" : "border-gray-200 text-gray-500 hover:bg-gray-50"}`}>
                       <ArrowDown size={11} /> Z → A
                     </button>
                   </div>
@@ -454,7 +454,7 @@ export default function AnggotaPage() {
                   {ALL_COLUMNS.map((col) => (
                     <button key={col.key} onClick={() => { setSortKey(col.key); setPage(1); setSortOpen(false); }}
                       className={`w-full flex items-center justify-between px-3 py-1.5 text-sm text-left transition-colors ${
-                        sortKey === col.key ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-700 hover:bg-gray-50"
+                        sortKey === col.key ? "bg-neutral-100 text-neutral-900 font-medium" : "text-gray-700 hover:bg-gray-50"
                       }`}>
                       {col.label}
                       {sortKey === col.key && (sortDir === "asc" ? <ArrowUp size={12} /> : <ArrowDown size={12} />)}
@@ -469,12 +469,12 @@ export default function AnggotaPage() {
               <button onClick={() => setColsOpen((v) => !v)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-lg shadow-sm transition-colors ${
                   hiddenCols.size > 0
-                    ? "border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"
+                    ? "border-neutral-300 text-neutral-900 bg-neutral-100 hover:bg-neutral-200"
                     : "border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
                 }`}>
                 <Columns3 size={14} /> Kolom
                 {hiddenCols.size > 0 && (
-                  <span className="text-xs font-semibold text-blue-600">
+                  <span className="text-xs font-semibold text-neutral-900">
                     {ALL_COLUMNS.length - hiddenCols.size}/{ALL_COLUMNS.length}
                   </span>
                 )}
@@ -514,8 +514,8 @@ export default function AnggotaPage() {
                             {col.label}
                             {sortKey === col.key && (
                               sortDir === "asc"
-                                ? <ArrowUp size={12} className="text-blue-500" />
-                                : <ArrowDown size={12} className="text-blue-500" />
+                                ? <ArrowUp size={12} className="text-neutral-500" />
+                                : <ArrowDown size={12} className="text-neutral-500" />
                             )}
                           </span>
                         </th>
@@ -532,7 +532,7 @@ export default function AnggotaPage() {
                             </div>
                             <p className="text-sm text-gray-400">Belum ada anggota</p>
                             <button onClick={() => openAddModalRef.current()}
-                              className="text-xs text-blue-600 hover:underline">Tambah sekarang</button>
+                              className="text-xs font-medium text-neutral-900 underline underline-offset-2 hover:opacity-70">Tambah sekarang</button>
                           </div>
                         </td>
                       </tr>
@@ -561,7 +561,7 @@ export default function AnggotaPage() {
                                 member.gender ? (
                                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                                     member.gender === "L"
-                                      ? "bg-blue-50 text-blue-700"
+                                      ? "bg-neutral-100 text-neutral-900"
                                       : "bg-pink-50 text-pink-700"
                                   }`}>
                                     {member.gender === "L" ? "Laki-laki" : "Perempuan"}

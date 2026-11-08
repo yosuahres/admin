@@ -361,7 +361,7 @@ export default function UsherDashboardPage() {
           action={
             <Link
               href="/usher/attendance"
-              className="text-xs font-medium text-blue-600 hover:text-blue-700"
+              className="text-xs font-medium text-neutral-900 hover:text-neutral-900"
             >
               Lihat semua
             </Link>
@@ -489,7 +489,7 @@ export default function UsherDashboardPage() {
         action={
           <Link
             href="/usher/attendance"
-            className="text-xs font-medium text-blue-600 hover:text-blue-700"
+            className="text-xs font-medium text-neutral-900 hover:text-neutral-900"
           >
             Lihat semua
           </Link>
@@ -524,7 +524,7 @@ export default function UsherDashboardPage() {
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-sm text-gray-400">
                     Belum ada laporan yang dikirim.{" "}
-                    <Link href="/usher/attendance" className="text-blue-600 underline underline-offset-2">
+                    <Link href="/usher/attendance" className="text-neutral-900 underline underline-offset-2">
                       Buat laporan pertama
                     </Link>
                   </td>

@@ -129,7 +129,7 @@ export default function EventsPage() {
       render: (value: string, item: any) => (
         <button
           onClick={() => toggleExpand(item)}
-          className="flex items-center gap-1.5 text-left hover:text-blue-600 transition-colors"
+          className="flex items-center gap-1.5 text-left hover:text-neutral-900 transition-colors"
         >
           <span
             className={`text-xs transition-transform duration-200 inline-block ${
@@ -147,7 +147,7 @@ export default function EventsPage() {
       label: "Tipe",
       render: (value: string) =>
         value ? (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-900 border border-neutral-200">
             {value}
           </span>
         ) : "-",
@@ -182,7 +182,7 @@ export default function EventsPage() {
               value={value ?? ""}
               disabled={isSaving}
               onChange={(e) => handleRecurrenceChange(item, e.target.value)}
-              className={`text-xs border rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 transition-colors ${
+              className={`text-xs border rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900 transition-colors ${
                 value
                   ? "border-purple-200 bg-purple-50 text-purple-700"
                   : "border-gray-200 bg-white text-gray-500"
@@ -247,7 +247,7 @@ export default function EventsPage() {
 
         {loadingOcc ? (
           <div className="flex items-center gap-2 py-3">
-            <div className="w-3 h-3 rounded-full border-2 border-blue-400 border-t-transparent animate-spin" />
+            <div className="w-3 h-3 rounded-full border-2 border-neutral-300 border-t-transparent animate-spin" />
             <p className="text-xs text-gray-400">Memuat occurrences...</p>
           </div>
         ) : occurrences.length === 0 ? (

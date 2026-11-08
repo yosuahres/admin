@@ -185,7 +185,7 @@ export default function BudgetPage() {
               key={pt}
               onClick={() => setPeriodType(pt)}
               className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                periodType === pt ? "bg-blue-50 text-blue-700" : "text-gray-500 hover:text-gray-700"
+                periodType === pt ? "bg-neutral-100 text-neutral-900" : "text-gray-500 hover:text-gray-700"
               }`}
             >
               {pt === "month" ? "Bulanan" : "Tahunan"}
@@ -244,7 +244,7 @@ export default function BudgetPage() {
                       key={m}
                       onClick={() => { setMonth(i + 1); setPeriodOpen(false); }}
                       className={`text-xs py-1.5 rounded-md transition-colors ${
-                        month === i + 1 ? "bg-blue-500 text-white font-medium" : "text-gray-600 hover:bg-gray-100"
+                        month === i + 1 ? "bg-neutral-900 text-white font-medium" : "text-gray-600 hover:bg-gray-100"
                       }`}
                     >
                       {m.slice(0, 3)}
@@ -255,7 +255,7 @@ export default function BudgetPage() {
               {periodType === "year" && (
                 <button
                   onClick={() => setPeriodOpen(false)}
-                  className="w-full text-xs py-1.5 rounded-md bg-blue-500 text-white font-medium"
+                  className="w-full text-xs py-1.5 rounded-md bg-neutral-900 text-white font-medium"
                 >
                   Pilih {year}
                 </button>
@@ -282,7 +282,7 @@ export default function BudgetPage() {
           loading={loading}
         />
         <div className={`border rounded-xl px-4 py-3 col-span-2 lg:col-span-1 ${
-          inc.planned - exp.planned >= 0 ? "bg-blue-50 border-blue-100" : "bg-orange-50 border-orange-100"
+          inc.planned - exp.planned >= 0 ? "bg-neutral-100 border-neutral-200" : "bg-orange-50 border-orange-100"
         }`}>
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs font-medium text-gray-600">Sisa Anggaran (Rencana)</span>
@@ -633,7 +633,7 @@ function CategoryBudgetModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-scrim/40 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
           <div>
@@ -671,7 +671,7 @@ function CategoryBudgetModal({
                           placeholder="0"
                           value={r.amount}
                           onChange={(e) => updateRow(r.key, "amount", formatRupiahInput(e.target.value))}
-                          className="w-full pl-8 pr-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-right"
+                          className="w-full pl-8 pr-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900 text-right"
                         />
                       </div>
                     </td>
@@ -681,7 +681,7 @@ function CategoryBudgetModal({
                         placeholder="Catatan (opsional)"
                         value={r.note}
                         onChange={(e) => updateRow(r.key, "note", e.target.value)}
-                        className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400"
+                        className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900"
                       />
                     </td>
                     <td className="px-2 py-2 text-center">

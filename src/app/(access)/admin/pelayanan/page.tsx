@@ -87,7 +87,7 @@ export default function PelayananPage() {
         <div className="flex items-center gap-1">
           <button
             onClick={(e) => { e.stopPropagation(); setEditItem(item); setIsModalOpen(true); }}
-            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="p-1.5 text-gray-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
           >
             <Pencil size={14} />
           </button>

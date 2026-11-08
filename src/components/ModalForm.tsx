@@ -1,6 +1,16 @@
 "use client";
-import { Plus, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Loader2, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { cn } from "@/utils/helpers";
+import {
+  DIALOG_PANEL,
+  DIALOG_SCRIM,
+  INPUT,
+  LABEL,
+  PRIMARY_BUTTON,
+  SECONDARY_BUTTON,
+  TEXTAREA,
+} from "./ui/styles";
 
 interface ModalFormProps {
   isOpen: boolean;
@@ -9,7 +19,15 @@ interface ModalFormProps {
   fields: {
     name: string;
     label: string;
-    type: "text" | "email" | "password" | "select" | "textarea" | "date" | "time" | "number";
+    type:
+      | "text"
+      | "email"
+      | "password"
+      | "select"
+      | "textarea"
+      | "date"
+      | "time"
+      | "number";
     options?: { value: string; label: string }[];
     required?: boolean;
     placeholder?: string;
@@ -81,116 +99,148 @@ export default function ModalForm({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+    <div className={DIALOG_SCRIM}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-form-title"
+        className={cn(
+          DIALOG_PANEL,
+          "flex max-h-[90vh] max-w-2xl flex-col overflow-hidden",
+        )}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-black/8 px-5 py-4">
+          <h2
+            id="modal-form-title"
+            className="text-base font-semibold text-neutral-900"
           >
-            <X size={20} className="text-gray-500" />
+            {title}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="grid size-8 cursor-pointer place-items-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+          >
+            <X className="size-4" strokeWidth={1.75} />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {fields.map((field) => (
-            <div key={field.name} className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                {field.label}{" "}
-                {field.required && <span className="text-red-500">*</span>}
-              </label>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="grid gap-x-6 gap-y-5 overflow-y-auto px-5 py-5 md:grid-cols-2">
+            {fields.map((field) => (
+              <div
+                key={field.name}
+                className={cn(
+                  "flex flex-col gap-2",
+                  field.type === "textarea" && "md:col-span-2",
+                )}
+              >
+                <label htmlFor={`field-${field.name}`} className={LABEL}>
+                  {field.label}{" "}
+                  {field.required && <span className="text-red-600">*</span>}
+                </label>
 
-              {field.type === "select" ? (
-                <select
-                  value={formData[field.name] || ""}
-                  onChange={(e) => handleInputChange(field.name, e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required={field.required}
-                >
-                  <option value="">Select {field.label}</option>
-                  {field.options?.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                {field.type === "select" ? (
+                  <select
+                    id={`field-${field.name}`}
+                    value={formData[field.name] || ""}
+                    onChange={(e) =>
+                      handleInputChange(field.name, e.target.value)
+                    }
+                    className={INPUT}
+                    required={field.required}
+                  >
+                    <option value="">Select {field.label}</option>
+                    {field.options?.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : field.type === "time" ? (
+                  // Custom time select — avoids browser 12/24h locale issues
+                  <select
+                    id={`field-${field.name}`}
+                    value={formData[field.name] || ""}
+                    onChange={(e) =>
+                      handleInputChange(field.name, e.target.value)
+                    }
+                    className={INPUT}
+                    required={field.required}
+                  >
+                    {TIME_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : field.type === "textarea" ? (
+                  <textarea
+                    id={`field-${field.name}`}
+                    value={formData[field.name] || ""}
+                    onChange={(e) =>
+                      handleInputChange(field.name, e.target.value)
+                    }
+                    placeholder={field.placeholder}
+                    className={cn(TEXTAREA, "resize-none")}
+                    rows={4}
+                    required={field.required}
+                  />
+                ) : field.type === "number" ? (
+                  <input
+                    id={`field-${field.name}`}
+                    type="number"
+                    min={0}
+                    value={formData[field.name] ?? ""}
+                    onChange={(e) =>
+                      handleInputChange(
+                        field.name,
+                        e.target.value === "" ? "" : Number(e.target.value),
+                      )
+                    }
+                    placeholder={field.placeholder}
+                    className={INPUT}
+                    required={field.required}
+                  />
+                ) : (
+                  <input
+                    id={`field-${field.name}`}
+                    type={field.type}
+                    value={formData[field.name] || ""}
+                    onChange={(e) =>
+                      handleInputChange(field.name, e.target.value)
+                    }
+                    placeholder={field.placeholder}
+                    className={INPUT}
+                    required={field.required}
+                  />
+                )}
 
-              ) : field.type === "time" ? (
-                // Custom time select — avoids browser 12/24h locale issues
-                <select
-                  value={formData[field.name] || ""}
-                  onChange={(e) => handleInputChange(field.name, e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required={field.required}
-                >
-                  {TIME_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-
-              ) : field.type === "textarea" ? (
-                <textarea
-                  value={formData[field.name] || ""}
-                  onChange={(e) => handleInputChange(field.name, e.target.value)}
-                  placeholder={field.placeholder}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                  rows={4}
-                  required={field.required}
-                />
-
-              ) : field.type === "number" ? (
-                <input
-                  type="number"
-                  min={0}
-                  value={formData[field.name] ?? ""}
-                  onChange={(e) =>
-                    handleInputChange(
-                      field.name,
-                      e.target.value === "" ? "" : Number(e.target.value)
-                    )
-                  }
-                  placeholder={field.placeholder}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required={field.required}
-                />
-
-              ) : (
-                <input
-                  type={field.type}
-                  value={formData[field.name] || ""}
-                  onChange={(e) => handleInputChange(field.name, e.target.value)}
-                  placeholder={field.placeholder}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required={field.required}
-                />
-              )}
-
-              {errors[field.name] && (
-                <p className="text-red-500 text-sm">{errors[field.name]}</p>
-              )}
-            </div>
-          ))}
+                {errors[field.name] && (
+                  <p className="text-xs text-red-600">{errors[field.name]}</p>
+                )}
+              </div>
+            ))}
+          </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex shrink-0 justify-end gap-2 border-t border-black/8 px-5 py-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+              className={SECONDARY_BUTTON}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              className={PRIMARY_BUTTON}
             >
-              {isLoading && <Plus size={16} className="animate-spin" />}
+              {isLoading && <Loader2 className="size-3.5 animate-spin" />}
               {submitText}
             </button>
           </div>

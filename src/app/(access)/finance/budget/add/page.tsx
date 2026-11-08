@@ -240,7 +240,7 @@ function BudgetAddInner() {
                         placeholder="0"
                         value={item.amount}
                         onChange={(e) => updateItem(item.id, "amount", formatRupiah(e.target.value))}
-                        className="w-full pl-8 pr-2 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-right"
+                        className="w-full pl-8 pr-2 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900 text-right"
                       />
                     </div>
                   </div>
@@ -251,7 +251,7 @@ function BudgetAddInner() {
                       placeholder="Contoh: tambahan dana misi"
                       value={item.note}
                       onChange={(e) => updateItem(item.id, "note", e.target.value)}
-                      className="w-full px-2.5 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400"
+                      className="w-full px-2.5 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900"
                     />
                   </div>
                 </div>
@@ -309,7 +309,7 @@ function BudgetAddInner() {
                             placeholder="0"
                             value={item.amount}
                             onChange={(e) => updateItem(item.id, "amount", formatRupiah(e.target.value))}
-                            className="w-full pl-8 pr-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-right"
+                            className="w-full pl-8 pr-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900 text-right"
                           />
                         </div>
                       </td>
@@ -319,7 +319,7 @@ function BudgetAddInner() {
                           placeholder="Contoh: tambahan dana misi"
                           value={item.note}
                           onChange={(e) => updateItem(item.id, "note", e.target.value)}
-                          className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400"
+                          className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900"
                         />
                       </td>
                       <td className="px-3 py-2 text-center">
@@ -349,7 +349,7 @@ function BudgetAddInner() {
 
       {/* Add category modal */}
       {addingForItemId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-scrim/40 backdrop-blur-sm">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h2 className="text-base font-semibold text-gray-900">Tambah Kategori</h2>
@@ -380,7 +380,7 @@ function BudgetAddInner() {
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleSaveCat(); }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
                 />
               </div>
             </div>

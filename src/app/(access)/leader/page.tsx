@@ -272,11 +272,11 @@ export default function LeaderDashboardPage() {
   if (loadError === "no_group") {
     return (
       <div className="p-6 max-w-7xl mx-auto">
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
-          <p className="text-blue-800 font-medium">
+        <div className="bg-neutral-100 border border-neutral-200 rounded-xl p-6 text-center">
+          <p className="text-neutral-900 font-medium">
             Belum ada kelompok iCare yang ditugaskan.
           </p>
-          <p className="text-blue-600 text-sm mt-1">
+          <p className="text-neutral-900 text-sm mt-1">
             Hubungi admin untuk mendapatkan kelompok iCare.
           </p>
         </div>

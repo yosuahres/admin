@@ -88,7 +88,7 @@ function EventCombobox({
       <button
         type="button"
         onClick={open ? () => { setOpen(false); setQuery(""); } : handleOpen}
-        className="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
       >
         <span className={selected ? "text-gray-900 truncate" : "text-gray-400"}>
           {selected ? selected.label : "— Pilih Event —"}
@@ -194,7 +194,7 @@ function AddReportModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-scrim/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
@@ -242,7 +242,7 @@ function AddReportModal({
                   value={form[key]}
                   onChange={(e) => setField(key, e.target.value)}
                   placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
                 />
               </div>
             ))}
@@ -258,7 +258,7 @@ function AddReportModal({
               value={form.notes}
               onChange={(e) => setField("notes", e.target.value)}
               placeholder="Keterangan tambahan, kondisi khusus, dll..."
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent placeholder:text-gray-400"
             />
           </div>
 
@@ -395,7 +395,7 @@ export default function UsherAttendancePage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari event..."
-              className="w-full pl-8 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-gray-400"
+              className="w-full pl-8 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900 placeholder:text-gray-400"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-2 text-gray-400 hover:text-gray-600">

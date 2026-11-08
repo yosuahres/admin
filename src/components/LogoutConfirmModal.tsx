@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useRef } from "react";
 import { LogOut, X } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { PRIMARY_BUTTON, SECONDARY_BUTTON } from "./ui/styles";
 
 interface LogoutConfirmModalProps {
   open: boolean;
@@ -36,61 +37,44 @@ export default function LogoutConfirmModal({
       aria-labelledby="logout-title"
     >
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        aria-hidden
+        className="absolute inset-0 bg-scrim/40"
         onClick={onCancel}
       />
 
-      <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-modal-in">
-        <div className="p-6">
-          <button
-            onClick={onCancel}
-            className="absolute top-4 right-4 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-            aria-label="Close"
-          >
-            <X size={16} />
-          </button>
-
-          <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
-            <LogOut size={22} className="text-red-500" />
-          </div>
-
-          <h2
-            id="logout-title"
-            className="text-base font-semibold text-gray-900 mb-1"
-          >
+      <div className="relative w-full max-w-sm rounded-2xl border border-black/10 bg-white p-5 text-neutral-900 shadow-2xl">
+        <div className="mb-1 flex items-start gap-2">
+          <h2 id="logout-title" className="flex-1 text-base font-semibold">
             Sign out of your account?
           </h2>
-          <p className="text-sm text-gray-500">
-            You'll need to sign in again to access the dashboard.
-          </p>
+          <button
+            type="button"
+            onClick={onCancel}
+            aria-label="Close"
+            className="-mt-1 -mr-1 grid size-8 cursor-pointer place-items-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+          >
+            <X className="size-4" strokeWidth={1.75} />
+          </button>
+        </div>
+        <p className="text-sm text-neutral-500">
+          You&apos;ll need to sign in again to access the dashboard.
+        </p>
 
-          <div className="flex gap-3 mt-6">
-            <button
-              ref={cancelRef}
-              onClick={onCancel}
-              className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={onConfirm}
-              className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-zinc-900 hover:bg-black active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700"
-            >
-              Sign out
-            </button>
-          </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            ref={cancelRef}
+            type="button"
+            onClick={onCancel}
+            className={SECONDARY_BUTTON}
+          >
+            Cancel
+          </button>
+          <button type="button" onClick={onConfirm} className={PRIMARY_BUTTON}>
+            <LogOut className="size-3.5" strokeWidth={2} />
+            Sign out
+          </button>
         </div>
       </div>
-
-      <style>{`
-        @keyframes modal-in {
-          from { opacity: 0; transform: scale(0.95) translateY(8px); }
-          to   { opacity: 1; transform: scale(1)    translateY(0);   }
-        }
-        .animate-modal-in {
-          animation: modal-in 0.18s cubic-bezier(0.34, 1.3, 0.64, 1) forwards;
-        }
-      `}</style>
     </div>
   );
 }

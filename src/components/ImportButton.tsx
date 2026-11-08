@@ -76,7 +76,7 @@ export default function ImportButton({
       {/* Trigger button */}
       <button
         onClick={() => { onTrigger?.(); fileInputRef.current?.click(); }}
-        className={className ?? "flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 font-medium whitespace-nowrap"}
+        className={className ?? "flex items-center gap-2 text-sm text-gray-700 hover:text-neutral-900 font-medium whitespace-nowrap"}
       >
         <Upload size={18} />
         <span>{label}</span>
@@ -92,7 +92,7 @@ export default function ImportButton({
 
       {/* Preview / Confirm modal */}
       {step !== "idle" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-scrim/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">

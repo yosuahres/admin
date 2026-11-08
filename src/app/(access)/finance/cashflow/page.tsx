@@ -105,7 +105,7 @@ export default function CashflowPage() {
             placeholder="Cari deskripsi..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-8 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-gray-400"
+            className="w-full pl-8 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900 placeholder:text-gray-400"
           />
           {search && (
             <button onClick={() => { setSearch(""); setPage(1); }} className="absolute right-2 text-gray-400 hover:text-gray-600">
@@ -119,7 +119,7 @@ export default function CashflowPage() {
             onClick={() => setTypeOpen((v) => !v)}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-lg shadow-sm transition-colors ${
               typeFilter !== "all"
-                ? "border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"
+                ? "border-neutral-300 text-neutral-900 bg-neutral-100 hover:bg-neutral-200"
                 : "border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
             }`}
           >
@@ -133,7 +133,7 @@ export default function CashflowPage() {
                   key={t}
                   onClick={() => { setTypeFilter(t); setPage(1); setTypeOpen(false); }}
                   className={`w-full text-left px-3 py-1.5 text-sm transition-colors ${
-                    typeFilter === t ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-700 hover:bg-gray-50"
+                    typeFilter === t ? "bg-neutral-100 text-neutral-900 font-medium" : "text-gray-700 hover:bg-gray-50"
                   }`}
                 >
                   {t === "all" ? "Semua" : t === "in" ? "Pemasukan" : "Pengeluaran"}
@@ -162,11 +162,11 @@ export default function CashflowPage() {
         {!isDefaultSort && (
           <button
             onClick={() => { setSortKey("transaction_date"); setSortDir("desc"); setPage(1); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-900 bg-neutral-100 border border-neutral-200 rounded-lg hover:bg-neutral-200 transition-colors"
           >
             {sortDir === "asc" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
             {SORT_COLS.find((c) => c.key === sortKey)?.label}
-            <X size={11} className="ml-0.5 text-blue-400" />
+            <X size={11} className="ml-0.5 text-neutral-500" />
           </button>
         )}
 
@@ -177,7 +177,7 @@ export default function CashflowPage() {
             onClick={() => setSortOpen((v) => !v)}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-lg shadow-sm transition-colors ${
               !isDefaultSort
-                ? "border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"
+                ? "border-neutral-300 text-neutral-900 bg-neutral-100 hover:bg-neutral-200"
                 : "border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
             }`}
           >
@@ -191,7 +191,7 @@ export default function CashflowPage() {
                 {!isDefaultSort && (
                   <button
                     onClick={() => { setSortKey("transaction_date"); setSortDir("desc"); setPage(1); setSortOpen(false); }}
-                    className="text-xs text-blue-500 hover:text-blue-700"
+                    className="text-xs text-neutral-500 hover:text-neutral-900"
                   >
                     Reset
                   </button>
@@ -201,7 +201,7 @@ export default function CashflowPage() {
                 <button
                   onClick={() => { setSortDir("asc"); setPage(1); }}
                   className={`flex-1 flex items-center justify-center gap-1 py-1 text-xs rounded-md border transition-colors ${
-                    sortDir === "asc" ? "border-blue-400 bg-blue-50 text-blue-700 font-medium" : "border-gray-200 text-gray-500 hover:bg-gray-50"
+                    sortDir === "asc" ? "border-neutral-300 bg-neutral-100 text-neutral-900 font-medium" : "border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}
                 >
                   <ArrowUp size={11} /> A → Z
@@ -209,7 +209,7 @@ export default function CashflowPage() {
                 <button
                   onClick={() => { setSortDir("desc"); setPage(1); }}
                   className={`flex-1 flex items-center justify-center gap-1 py-1 text-xs rounded-md border transition-colors ${
-                    sortDir === "desc" ? "border-blue-400 bg-blue-50 text-blue-700 font-medium" : "border-gray-200 text-gray-500 hover:bg-gray-50"
+                    sortDir === "desc" ? "border-neutral-300 bg-neutral-100 text-neutral-900 font-medium" : "border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}
                 >
                   <ArrowDown size={11} /> Z → A
@@ -221,7 +221,7 @@ export default function CashflowPage() {
                   key={col.key}
                   onClick={() => { setSortKey(col.key); setPage(1); setSortOpen(false); }}
                   className={`w-full flex items-center justify-between px-3 py-1.5 text-sm text-left transition-colors ${
-                    sortKey === col.key ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-700 hover:bg-gray-50"
+                    sortKey === col.key ? "bg-neutral-100 text-neutral-900 font-medium" : "text-gray-700 hover:bg-gray-50"
                   }`}
                 >
                   {col.label}

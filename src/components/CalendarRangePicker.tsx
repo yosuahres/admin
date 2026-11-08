@@ -105,7 +105,7 @@ export function CalendarRangePicker({
 
   const defaultBtnCls = `flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-lg shadow-sm transition-colors ${
     hasValue
-      ? "border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"
+      ? "border-neutral-300 text-neutral-900 bg-neutral-100 hover:bg-neutral-200"
       : "border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
   }`;
 

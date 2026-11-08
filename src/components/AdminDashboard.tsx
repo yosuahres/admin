@@ -240,9 +240,9 @@ function CalendarPicker({
               onMouseLeave={() => setHoverDate(null)}
               className={[
                 "text-[10px] h-6 w-full flex items-center justify-center transition-colors",
-                start || end ? "bg-blue-500 text-white rounded-full font-semibold z-10"
-                  : inRange ? "bg-blue-50 text-blue-700 rounded-none"
-                  : hover ? "bg-blue-100 text-blue-600 rounded-full"
+                start || end ? "bg-neutral-900 text-white rounded-full font-semibold z-10"
+                  : inRange ? "bg-neutral-100 text-neutral-900 rounded-none"
+                  : hover ? "bg-neutral-200 text-neutral-900 rounded-full"
                   : "text-gray-700 hover:bg-gray-100 rounded-full",
               ].join(" ")}
             >
@@ -265,7 +265,7 @@ function CalendarPicker({
       <button
         onClick={() => { if (customFrom && customTo) onApply(); }}
         disabled={!customFrom || !customTo}
-        className="w-full mt-2 text-xs font-medium bg-blue-500 text-white rounded-md py-1.5 hover:bg-blue-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-full mt-2 text-xs font-medium bg-neutral-900 text-white rounded-md py-1.5 hover:bg-neutral-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
         Terapkan
       </button>

@@ -300,7 +300,7 @@ export default function PerpuluhanPage() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full pl-8 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-gray-400"
+            className="w-full pl-8 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900 placeholder:text-gray-400"
           />
           {search && (
             <button
@@ -322,7 +322,7 @@ export default function PerpuluhanPage() {
             onClick={() => setMethodOpen((v) => !v)}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-lg shadow-sm transition-colors ${
               methodFilter !== "all"
-                ? "border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"
+                ? "border-neutral-300 text-neutral-900 bg-neutral-100 hover:bg-neutral-200"
                 : "border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
             }`}
           >
@@ -345,7 +345,7 @@ export default function PerpuluhanPage() {
                     }}
                     className={`w-full text-left px-3 py-1.5 text-sm transition-colors ${
                       methodFilter === m
-                        ? "bg-blue-50 text-blue-700 font-medium"
+                        ? "bg-neutral-100 text-neutral-900 font-medium"
                         : "text-gray-700 hover:bg-gray-50"
                     }`}
                   >
@@ -386,7 +386,7 @@ export default function PerpuluhanPage() {
             onClick={() => setSortOpen((v) => !v)}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-lg shadow-sm transition-colors ${
               !isDefaultSort
-                ? "border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"
+                ? "border-neutral-300 text-neutral-900 bg-neutral-100 hover:bg-neutral-200"
                 : "border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
             }`}
           >
@@ -404,7 +404,7 @@ export default function PerpuluhanPage() {
                   }}
                   className={`flex-1 flex items-center justify-center gap-1 py-1 text-xs rounded-md border transition-colors ${
                     sortDir === "asc"
-                      ? "border-blue-400 bg-blue-50 text-blue-700 font-medium"
+                      ? "border-neutral-300 bg-neutral-100 text-neutral-900 font-medium"
                       : "border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}
                 >
@@ -418,7 +418,7 @@ export default function PerpuluhanPage() {
                   }}
                   className={`flex-1 flex items-center justify-center gap-1 py-1 text-xs rounded-md border transition-colors ${
                     sortDir === "desc"
-                      ? "border-blue-400 bg-blue-50 text-blue-700 font-medium"
+                      ? "border-neutral-300 bg-neutral-100 text-neutral-900 font-medium"
                       : "border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}
                 >
@@ -437,7 +437,7 @@ export default function PerpuluhanPage() {
                   }}
                   className={`w-full flex items-center justify-between px-3 py-1.5 text-sm text-left transition-colors ${
                     sortKey === col.key
-                      ? "bg-blue-50 text-blue-700 font-medium"
+                      ? "bg-neutral-100 text-neutral-900 font-medium"
                       : "text-gray-700 hover:bg-gray-50"
                   }`}
                 >

@@ -200,10 +200,10 @@ export default function PerpuluhanAddPage() {
                       jemaat_id: "",
                     }))
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
                 />
                 {form.jemaat_id && (
-                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-2 py-0.5">
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-neutral-900 bg-neutral-100 border border-neutral-200 rounded-full px-2 py-0.5">
                     Jemaat
                   </span>
                 )}
@@ -244,7 +244,7 @@ export default function PerpuluhanAddPage() {
                       amount: formatRupiah(e.target.value),
                     }))
                   }
-                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm text-right font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm text-right font-semibold focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
                 />
               </div>
             </div>
@@ -260,7 +260,7 @@ export default function PerpuluhanAddPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, transaction_date: e.target.value }))
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
               />
             </div>
 
@@ -324,7 +324,7 @@ export default function PerpuluhanAddPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, notes: e.target.value }))
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
               />
             </div>
           </div>

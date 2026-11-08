@@ -108,7 +108,7 @@ export default function CashflowEditPage() {
         <p className="text-sm">Transaksi tidak ditemukan.</p>
         <button
           onClick={() => router.push("/finance/cashflow")}
-          className="text-sm text-blue-600 hover:underline"
+          className="text-sm font-medium text-neutral-900 underline underline-offset-2 hover:opacity-70"
         >
           Kembali ke Cashflow
         </button>

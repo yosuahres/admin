@@ -64,13 +64,13 @@ function CheckboxRow({
       onClick={onToggle}
       className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border text-sm text-left w-full transition-colors ${
         checked
-          ? "bg-blue-50 border-blue-200 text-blue-800"
+          ? "bg-neutral-100 border-neutral-200 text-neutral-900"
           : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
       }`}
     >
       <div
         className={`w-4 h-4 rounded border shrink-0 flex items-center justify-center transition-colors ${
-          checked ? "bg-blue-600 border-blue-600" : "bg-white border-gray-300"
+          checked ? "bg-neutral-900 border-neutral-900" : "bg-white border-gray-300"
         }`}
       >
         {checked && <Check size={10} className="text-white" strokeWidth={3} />}
@@ -373,7 +373,7 @@ export default function PertemuanPage() {
 
       {/* ── Modal ─────────────────────────────────────────────────────────────── */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/25 p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-scrim/25 p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col border border-gray-200">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-900">
@@ -389,26 +389,26 @@ export default function PertemuanPage() {
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Tanggal *</label>
                   <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Lokasi</label>
                   <input type="text" value={lokasi} onChange={(e) => setLokasi(e.target.value)}
                     placeholder={groupRef.current?.lokasi_pertemuan ?? ""}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900" />
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">Topik / Firman</label>
                 <input type="text" value={topik} onChange={(e) => setTopik(e.target.value)}
                   placeholder="Topik atau judul firman"
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">Catatan</label>
                 <textarea value={catatan} onChange={(e) => setCatatan(e.target.value)} rows={2}
                   placeholder="Catatan tambahan..."
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 resize-none" />
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -416,13 +416,13 @@ export default function PertemuanPage() {
                     Kehadiran —{" "}
                     {loadingAttendance
                       ? <span className="text-gray-400">Memuat...</span>
-                      : <span className="text-blue-600 font-semibold">{presentCount}/{members.length}</span>
+                      : <span className="text-neutral-900 font-semibold">{presentCount}/{members.length}</span>
                     }
                   </label>
                   {!loadingAttendance && (
                     <div className="flex gap-3 text-xs">
                       <button onClick={() => { const a: AttendanceMap = {}; members.forEach((m) => { a[m.id] = true; }); setAttendance(a); }}
-                        className="text-blue-600 hover:underline">Semua</button>
+                        className="font-medium text-neutral-900 underline underline-offset-2 hover:opacity-70">Semua</button>
                       <button onClick={() => setAttendance(blankAttendance(members))}
                         className="text-gray-400 hover:underline">Reset</button>
                     </div>
@@ -497,7 +497,7 @@ export default function PertemuanPage() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Cari topik, lokasi, catatan..."
-                className="w-full pl-8 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-gray-400"
+                className="w-full pl-8 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900 placeholder:text-gray-400"
               />
               {searchInput && (
                 <button onClick={() => setSearchInput("")} className="absolute right-2 text-gray-400 hover:text-gray-600">
@@ -510,11 +510,11 @@ export default function PertemuanPage() {
             {sortKey !== "tanggal" && (
               <button
                 onClick={() => { setSortKey("tanggal"); setSortDir("desc"); setPage(1); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-900 bg-neutral-100 border border-neutral-200 rounded-lg hover:bg-neutral-200 transition-colors"
               >
                 {sortDir === "asc" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
                 {ALL_COLUMNS.find((c) => c.key === sortKey)?.label ?? sortKey}
-                <X size={11} className="ml-0.5 text-blue-400" />
+                <X size={11} className="ml-0.5 text-neutral-500" />
               </button>
             )}
 
@@ -526,7 +526,7 @@ export default function PertemuanPage() {
                 onClick={() => setSortOpen((v) => !v)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-lg shadow-sm transition-colors ${
                   sortKey !== "tanggal"
-                    ? "border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"
+                    ? "border-neutral-300 text-neutral-900 bg-neutral-100 hover:bg-neutral-200"
                     : "border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
                 }`}
               >
@@ -540,7 +540,7 @@ export default function PertemuanPage() {
                     {sortKey !== "tanggal" && (
                       <button
                         onClick={() => { setSortKey("tanggal"); setSortDir("desc"); setPage(1); setSortOpen(false); }}
-                        className="text-xs text-blue-500 hover:text-blue-700"
+                        className="text-xs text-neutral-500 hover:text-neutral-900"
                       >
                         Reset
                       </button>
@@ -550,7 +550,7 @@ export default function PertemuanPage() {
                     <button
                       onClick={() => { setSortDir("asc"); setPage(1); }}
                       className={`flex-1 flex items-center justify-center gap-1 py-1 text-xs rounded-md border transition-colors ${
-                        sortDir === "asc" ? "border-blue-400 bg-blue-50 text-blue-700 font-medium" : "border-gray-200 text-gray-500 hover:bg-gray-50"
+                        sortDir === "asc" ? "border-neutral-300 bg-neutral-100 text-neutral-900 font-medium" : "border-gray-200 text-gray-500 hover:bg-gray-50"
                       }`}
                     >
                       <ArrowUp size={11} /> A → Z
@@ -558,7 +558,7 @@ export default function PertemuanPage() {
                     <button
                       onClick={() => { setSortDir("desc"); setPage(1); }}
                       className={`flex-1 flex items-center justify-center gap-1 py-1 text-xs rounded-md border transition-colors ${
-                        sortDir === "desc" ? "border-blue-400 bg-blue-50 text-blue-700 font-medium" : "border-gray-200 text-gray-500 hover:bg-gray-50"
+                        sortDir === "desc" ? "border-neutral-300 bg-neutral-100 text-neutral-900 font-medium" : "border-gray-200 text-gray-500 hover:bg-gray-50"
                       }`}
                     >
                       <ArrowDown size={11} /> Z → A
@@ -570,7 +570,7 @@ export default function PertemuanPage() {
                       key={col.key}
                       onClick={() => { setSortKey(col.key); setPage(1); setSortOpen(false); }}
                       className={`w-full flex items-center justify-between px-3 py-1.5 text-sm text-left transition-colors ${
-                        sortKey === col.key ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-700 hover:bg-gray-50"
+                        sortKey === col.key ? "bg-neutral-100 text-neutral-900 font-medium" : "text-gray-700 hover:bg-gray-50"
                       }`}
                     >
                       {col.label}
@@ -587,14 +587,14 @@ export default function PertemuanPage() {
                 onClick={() => setColsOpen((v) => !v)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-lg shadow-sm transition-colors ${
                   hiddenCols.size > 0
-                    ? "border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"
+                    ? "border-neutral-300 text-neutral-900 bg-neutral-100 hover:bg-neutral-200"
                     : "border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
                 }`}
               >
                 <Columns3 size={14} />
                 Kolom
                 {hiddenCols.size > 0 && (
-                  <span className="text-xs font-semibold text-blue-600">
+                  <span className="text-xs font-semibold text-neutral-900">
                     {ALL_COLUMNS.length - hiddenCols.size}/{ALL_COLUMNS.length}
                   </span>
                 )}
@@ -647,8 +647,8 @@ export default function PertemuanPage() {
                             {col.label}
                             {sortKey === col.key && (
                               sortDir === "asc"
-                                ? <ArrowUp size={12} className="text-blue-500" />
-                                : <ArrowDown size={12} className="text-blue-500" />
+                                ? <ArrowUp size={12} className="text-neutral-500" />
+                                : <ArrowDown size={12} className="text-neutral-500" />
                             )}
                           </span>
                         </th>
@@ -665,7 +665,7 @@ export default function PertemuanPage() {
                             </div>
                             <p className="text-sm text-gray-400">Belum ada pertemuan tercatat</p>
                             <button onClick={() => openAddModalRef.current()}
-                              className="text-xs text-blue-600 hover:underline">Catat sekarang</button>
+                              className="text-xs font-medium text-neutral-900 underline underline-offset-2 hover:opacity-70">Catat sekarang</button>
                           </div>
                         </td>
                       </tr>
@@ -715,7 +715,7 @@ export default function PertemuanPage() {
                                   <span className="flex items-center gap-2">
                                     <span className="tabular-nums">{meeting.jumlah_hadir}/{members.length}</span>
                                     <div className="w-14 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                      <div className="h-full bg-blue-400 rounded-full" style={{ width: `${pct}%` }} />
+                                      <div className="h-full bg-neutral-800 rounded-full" style={{ width: `${pct}%` }} />
                                     </div>
                                   </span>
                                 )}
